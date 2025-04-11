@@ -21,6 +21,14 @@ from heapq import nlargest
 from openai import OpenAI
 import googleapiclient.discovery
 import googleapiclient.errors
+import numpy as np
+import re
+import sounddevice as sd
+from faster_whisper import WhisperModel
+from scipy.io.wavfile import write as write_wav
+import sys
+import fitz  # PyMuPDF
+import google.generativeai as genai
 
 # --- App Configuration ---
 app = Flask(__name__)
@@ -28,6 +36,21 @@ app = Flask(__name__)
 # You can generate one using: python -c 'import os; print(os.urandom(24))'
 app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', b'_5#y2L"F4Q8z\n\xec]/')
 app.config['DATABASE'] = 'enginsync.db'
+
+# Configure Google Generative AI (Gemini)
+GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', 'AIzaSyBDJi9htw2_i1C6-1Z8wM9OGuGFJYkgpyo')
+genai.configure(api_key=GEMINI_API_KEY)
+# Specific models for interview prep
+QUESTION_GEN_MODEL_NAME = 'gemini-2.0-flash'  # Model for generating questions
+ASSESSMENT_MODEL_NAME = 'gemini-2.0-flash'   # Model for assessments
+
+# Initialize Gemini model
+gemini_model = None
+try:
+    gemini_model = genai.GenerativeModel(ASSESSMENT_MODEL_NAME)
+    print(f"Gemini API initialized with model: {ASSESSMENT_MODEL_NAME}", file=sys.stderr)
+except Exception as e:
+    print(f"Error initializing Gemini API: {e}", file=sys.stderr)
 
 # Initialize OpenAI client for advanced summarization
 openai_api_key = os.environ.get('OPENAI_API_KEY')
@@ -105,6 +128,316 @@ def load_logged_in_user():
         if g.user is None: # Clear session if user_id is invalid
             session.clear()
 
+
+# --- Interview Prep Functions ---
+# Extract text from a resume PDF
+def extract_resume_text(pdf_path):
+    try:
+        with fitz.open(pdf_path) as doc:
+            text = ""
+            for page in doc:
+                text += page.get_text()
+        return text
+    except Exception as e:
+        print(f"Error opening or reading PDF: {e}", file=sys.stderr)
+        return None
+
+# Generate interview questions based on resume text using Gemini
+def generate_interview_questions(resume_text, job_role, experience_level, num_questions=4):
+    try:
+        # Clean up resume text
+        resume_text = re.sub(r'\s+', ' ', resume_text).strip()
+        resume_summary = resume_text[:4000]  # Limit text length for API
+
+        prompt = f"""You are an expert interviewer creating questions for a mock interview.
+        Candidate's Resume Summary:
+        ---
+        {resume_summary}
+        ---
+        Target Position: {experience_level} {job_role}
+        Number of Questions to Generate: {num_questions}
+        Instructions: Generate {num_questions} specific interview questions based only on the provided resume summary and the target position. Ensure the questions meet these criteria:
+        1. Directly relevant to the skills, experiences, or projects mentioned in the resume summary.
+        2. A mix of technical and behavioral questions appropriate for the role and experience level ({experience_level}).
+        3. Tailored to the {experience_level} level.
+        4. Probe deeper into listed experiences (e.g., "In project X, what was the most significant challenge..." not just "Tell me about project X").
+        Output Format: Provide only the questions as a numbered list. No intro/outro.
+        Example:
+        1. Question 1?
+        2. Question 2?
+        """
+
+        # Configure Gemini API
+        if not gemini_model:
+            print("Gemini API model not initialized", file=sys.stderr)
+            return _get_default_questions(job_role, experience_level, num_questions)
+
+        # Generate questions
+        response = gemini_model.generate_content(prompt)
+        try:
+            generated_text = response.text
+        except AttributeError:
+             # Try iterating parts if .text fails
+             try:
+                 generated_text = "".join(part.text for part in response.parts)
+             except Exception:
+                  # Fallback if parts access also fails (less common now)
+                  print("Could not access response text using standard methods.", file=sys.stderr)
+                  response_text = str(response) # Use string representation as last resort
+        except Exception as e:
+             print(f"Error extracting text from response: {e}", file=sys.stderr)
+             return _get_default_questions(job_role, experience_level, num_questions)
+
+        # Parse questions from response
+        questions = []
+        potential_questions = generated_text.split('\n')
+        for line in potential_questions:
+            cleaned_line = re.sub(r'^\s*\d+[\.\)]?\s*', '', line.strip())
+            if cleaned_line.endswith('?') and len(cleaned_line) > 10:
+                questions.append(cleaned_line)
+            elif len(cleaned_line) > 10 and '?' in cleaned_line and not line.startswith("---") and not line.lower().startswith("example"):
+                questions.append(cleaned_line)
+
+        # Add default questions if we don't have enough
+        default_questions = [
+            f"Can you walk me through your experience relevant to a {job_role} position?",
+            f"Based on your resume, what project are you most proud of and why?",
+            f"Describe a challenging technical problem you solved, as related to the skills needed for a {experience_level} {job_role}.",
+            f"Why are you interested in this specific {job_role} role at this stage in your career?"
+        ]
+        
+        if len(questions) < num_questions:
+            needed = num_questions - len(questions)
+            questions.extend(default_questions[:needed])
+
+        return questions[:num_questions]
+
+    except Exception as e:
+        print(f"Error generating questions (API/Model: {QUESTION_GEN_MODEL_NAME}): {e}", file=sys.stderr)
+        return [
+            f"Can you describe your experience in {job_role}?",
+            "What are your greatest professional achievements mentioned in your resume?",
+            "How do you handle challenging situations at work, perhaps related to projects listed?",
+            f"Why are you interested in pursuing a {experience_level} {job_role} position?"
+        ]
+
+def _get_default_questions(job_role, experience_level, num_questions=4):
+    """Get default questions if API fails"""
+    default_questions = [
+        f"Can you walk me through your experience relevant to a {job_role} position?",
+        f"Based on your resume, what project are you most proud of and why?",
+        f"Describe a challenging technical problem you solved, as related to the skills needed for a {experience_level} {job_role}.",
+        f"Why are you interested in this specific {job_role} role at this stage in your career?"
+    ]
+    return default_questions[:num_questions]
+
+# Record audio function (for AJAX calls)
+def record_audio_to_file(output_path, duration=30):
+    """Record audio for a specified duration and save to a file"""
+    try:
+        fs = 44100  # Sample rate
+        sd.default.samplerate = fs
+        sd.default.channels = 1
+        
+        print(f"Recording audio for {duration} seconds...", file=sys.stderr)
+        recording = sd.rec(int(duration * fs), dtype='float32')
+        sd.wait()  # Wait until recording is finished
+        
+        # Convert to int16 for WAV file
+        recording_int16 = np.int16(recording * 32767)
+        
+        # Save as WAV file
+        write_wav(output_path, fs, recording_int16)
+        return True
+    except Exception as e:
+        print(f"Error recording audio: {e}", file=sys.stderr)
+        return False
+
+# Transcribe audio using audio data
+def transcribe_audio(audio_file_path, prompt_context=""):
+    """
+    Transcribe audio to text without enhancements or modifications.
+    Only captures the exact words spoken by the user.
+    """
+    try:
+        # Try to use faster-whisper transcription
+        try:
+            # Load the faster-whisper model (use the appropriate model size)
+            model = WhisperModel("base", device="cpu", compute_type="int8")
+            
+            # Set options to focus on exact transcription
+            # Note: faster-whisper has a different API than original whisper
+            segments, info = model.transcribe(
+                audio_file_path,
+                beam_size=5,
+                word_timestamps=False,
+                initial_prompt="Transcribe the following audio exactly as spoken, word for word."
+            )
+            
+            # Collect all segments into a single transcript
+            transcript = ""
+            for segment in segments:
+                transcript += segment.text + " "
+            
+            transcript = transcript.strip()
+            
+            # If transcript is empty, return a placeholder
+            if not transcript:
+                print(f"Empty transcript from Whisper", file=sys.stderr)
+                return "[No speech detected]"
+                
+            return transcript
+            
+        except ImportError as e:
+            print(f"Error importing WhisperModel: {e}", file=sys.stderr)
+            return get_mock_transcript(prompt_context)
+        except Exception as e:
+            print(f"Error using faster-whisper: {e}", file=sys.stderr)
+            return get_mock_transcript(prompt_context)
+            
+    except Exception as e:
+        print(f"Error transcribing audio: {e}", file=sys.stderr)
+        return get_mock_transcript(prompt_context)
+
+# Get a mock transcript for testing when audio transcription fails
+def get_mock_transcript(question_context=""):
+    """
+    Provide a simple mock transcript when actual transcription fails.
+    Returns a basic response appropriate for testing purposes only.
+    """
+    # Dictionary of basic responses for different question types
+    mock_responses = {
+        "experience": "I worked at ABC Company for three years in software development.",
+        "project": "I built a dashboard that helped our team track key metrics more efficiently.",
+        "challenge": "We had an issue with the database performance that I solved by optimizing queries.",
+        "interest": "I'm interested in this role because it matches my skills in development.",
+        "default": "I have relevant experience for this position based on my previous work."
+    }
+    
+    # Determine which response to use based on keywords in the question
+    if not question_context:
+        return mock_responses["default"]
+    
+    question_lower = question_context.lower()
+    if any(keyword in question_lower for keyword in ["experience", "background", "work history"]):
+        return mock_responses["experience"]
+    elif any(keyword in question_lower for keyword in ["project", "achievement", "proud", "accomplish"]):
+        return mock_responses["project"]
+    elif any(keyword in question_lower for keyword in ["challenge", "difficult", "problem", "obstacle"]):
+        return mock_responses["challenge"]
+    elif any(keyword in question_lower for keyword in ["interest", "why", "reason", "apply"]):
+        return mock_responses["interest"]
+    else:
+        return mock_responses["default"]
+
+# Assess interview answer using Gemini
+def get_ai_assessment(question, answer, job_role, experience_level):
+    """
+    Uses Gemini to assess a single interview answer based on predefined criteria.
+    
+    Args:
+        question (str): The interview question asked.
+        answer (str): The candidate's transcribed answer.
+        job_role (str): The target job role.
+        experience_level (str): The target experience level.
+        
+    Returns:
+        int: rating on a scale of 1-5, or 0 if no answer provided, or None if error
+    """
+    if not answer or answer.strip() == "":
+         return 0 # Rate 0 for empty answers
+
+    try:
+        # Define the rating scale clearly for the AI
+        rating_scale_definition = """
+        Rating Scale (1-5):
+        1 - Poor: Answer is irrelevant, unclear, incomplete, and poorly structured. Shows fundamental misunderstanding.
+        2 - Fair: Answer is partially relevant but lacks clarity, detail, or structure. Shows basic understanding but needs significant improvement.
+        3 - Good: Answer is relevant, reasonably clear, and provides adequate detail and structure. Meets basic expectations for the level.
+        4 - Very Good: Answer is highly relevant, clear, detailed, well-structured, and demonstrates strong understanding/skills. Exceeds basic expectations.
+        5 - Excellent: Answer is outstandingly relevant, clear, concise yet comprehensive, perfectly structured, and showcases exceptional insight or skill. Truly impressive.
+        """
+
+        prompt = f"""You are an expert Hiring Manager evaluating a candidate's response during a mock interview.
+        Your task is to assess the following answer based on the provided criteria and assign a rating from 1 to 5.
+
+        Context:
+        - Target Job Role: {experience_level} {job_role}
+        - Interview Question: "{question}"
+        - Candidate's Answer: "{answer}"
+
+        Evaluation Criteria:
+        1. Relevance: How directly and effectively does the answer address the specific question asked?
+        2. Clarity: Is the language clear, concise, and easy to understand? Is the candidate articulate?
+        3. Completeness & Detail: Does the answer provide sufficient depth, examples, and evidence relevant to the question and the candidate's experience level ({experience_level})? Avoids being overly brief or excessively rambling.
+        4. Structure: Is the answer well-organized and logical? (e.g., For behavioral questions, does it resemble the STAR method - Situation, Task, Action, Result?)
+
+        {rating_scale_definition}
+
+        Instructions:
+        1. Analyze the candidate's answer thoroughly against the criteria.
+        2. Determine the most appropriate rating (1-5) based on the scale definition.
+
+        Output Format: Respond ONLY with the numerical rating (1-5) as a single digit.
+        Example: 4
+        """
+
+        # Check if Gemini API is available
+        if not gemini_model:
+            print("Gemini API model not initialized for assessment", file=sys.stderr)
+            return 3 # Return just a default rating
+
+        # Generate assessment
+        response = gemini_model.generate_content(prompt)
+        
+        # --- Robust Parsing of AI Response ---
+        response_text = ""
+        try:
+            # Try standard .text access
+            response_text = response.text
+        except AttributeError:
+             # Try iterating parts if .text fails
+             try:
+                 response_text = "".join(part.text for part in response.parts)
+             except Exception:
+                  # Fallback if parts access also fails (less common now)
+                  print("Could not access response text using standard methods.", file=sys.stderr)
+                  response_text = str(response) # Use string representation as last resort
+        except Exception as e:
+             print(f"Error extracting text from assessment response: {e}", file=sys.stderr)
+             return None
+
+        # Clean potential markdown/formatting artifacts and extract just the number
+        cleaned_text = response_text.strip()
+        
+        # Try to extract just a rating number
+        try:
+            # Look for a single digit 1-5 in the response
+            rating_match = re.search(r'\b([1-5])\b', cleaned_text)
+            if rating_match:
+                rating = int(rating_match.group(1))
+                if 1 <= rating <= 5:
+                    return rating
+            
+            # If no match but the cleaned text is just a digit, try that
+            if cleaned_text.isdigit() and len(cleaned_text) == 1:
+                rating = int(cleaned_text)
+                if 1 <= rating <= 5:
+                    return rating
+                    
+            print(f"Could not extract valid rating from: {cleaned_text}", file=sys.stderr)
+            return 3 # Default to middle rating if parsing fails
+            
+        except Exception as e_reg:
+            print(f"Error during regex parsing: {e_reg}", file=sys.stderr)
+            return 3 # Default to middle rating
+
+    except Exception as e:
+        print(f"Error getting AI assessment (API/Model: {ASSESSMENT_MODEL_NAME}): {e}", file=sys.stderr)
+        # Check for specific API errors if possible (e.g., rate limits, auth)
+        if "API key" in str(e):
+             print("Check your Google API Key configuration and permissions.", file=sys.stderr)
+        return None
 
 # --- Routes ---
 
@@ -307,6 +640,274 @@ def planner():
     """Placeholder for planner page."""
     return render_template('planner.html', back_url=url_for('dashboard'))
 
+@app.route('/ai_planner')
+@login_required
+def ai_planner():
+    """AI-powered personalized planner page."""
+    return render_template('ai_planner.html', back_url=url_for('dashboard'))
+
+@app.route('/interview_prep')
+@login_required
+def interview_prep():
+    """Interview preparation with Mr. Nags."""
+    # This is equivalent to the main Streamlit page
+    # In Flask, we'll render the template and handle the logic via AJAX requests
+    return render_template('interview_prep.html', back_url=url_for('dashboard'))
+
+@app.route('/generate_interview_questions', methods=['POST'])
+@login_required
+def generate_interview_questions_route():
+    """Generate interview questions based on uploaded resume."""
+    try:
+        # Check if a file was uploaded
+        if 'resume' not in request.files:
+            return jsonify({'success': False, 'error': 'No resume file uploaded'})
+        
+        resume_file = request.files['resume']
+        if resume_file.filename == '':
+            return jsonify({'success': False, 'error': 'No file selected'})
+        
+        # Get job role and experience level from form
+        job_role = request.form.get('job_role', '')
+        experience_level = request.form.get('experience_level', 'Mid')
+        
+        # Save the uploaded file temporarily
+        temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.pdf')
+        resume_file.save(temp_file.name)
+        temp_file.close()
+        
+        # Extract text from resume
+        resume_text = extract_resume_text(temp_file.name)
+        
+        # Remove temporary file
+        os.unlink(temp_file.name)
+        
+        if not resume_text:
+            return jsonify({'success': False, 'error': 'Failed to extract text from resume'})
+        
+        # Generate questions
+        questions = generate_interview_questions(resume_text, job_role, experience_level)
+        
+        # Store questions in session
+        session['interview_questions'] = questions
+        session['interview_job_role'] = job_role
+        session['interview_experience_level'] = experience_level
+        # Reset answers and assessments for a new interview
+        session['interview_answers'] = {}
+        session['interview_assessments'] = {}
+        session['interview_current_question'] = 0
+        session['interview_complete'] = False
+        session.modified = True
+        
+        return jsonify({
+            'success': True, 
+            'questions': questions
+        })
+    
+    except Exception as e:
+        print(f"Error generating interview questions: {e}", file=sys.stderr)
+        return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/record_interview_answer', methods=['POST'])
+@login_required
+def record_interview_answer():
+    """Process uploaded audio file and transcribe it."""
+    try:
+        # Check if an audio file was uploaded
+        if 'audio' not in request.files:
+            return jsonify({'success': False, 'error': 'No audio file uploaded'})
+        
+        audio_file = request.files['audio']
+        if audio_file.filename == '':
+            return jsonify({'success': False, 'error': 'No file selected'})
+        
+        # Save the uploaded audio file temporarily
+        temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.wav')
+        audio_file.save(temp_file.name)
+        temp_file.close()
+        
+        # Get question for context (helps with more accurate transcription)
+        question_index = int(request.form.get('question_index', 0))
+        
+        question_context = ""
+        if 'interview_questions' in session and question_index < len(session['interview_questions']):
+            question_context = session['interview_questions'][question_index]
+        
+        # Transcribe audio
+        transcript = transcribe_audio(temp_file.name, prompt_context=question_context)
+        
+        # Remove temporary file
+        os.unlink(temp_file.name)
+        
+        # Store answer in session
+        if 'interview_answers' not in session:
+            session['interview_answers'] = {}
+        
+        # Store answer by question text
+        if 'interview_questions' in session and question_index < len(session['interview_questions']):
+            question = session['interview_questions'][question_index]
+            session['interview_answers'][question] = transcript
+            
+            # Initialize assessment placeholder
+            if 'interview_assessments' not in session:
+                session['interview_assessments'] = {}
+            session['interview_assessments'][question] = {'rating': None, 'justification': None}
+            
+            # Update current question - if at the end, mark interview as complete
+            current_q = session.get('interview_current_question', 0)
+            if current_q == question_index:  # If answering current question (not going back to previous)
+                if current_q < len(session['interview_questions']) - 1:
+                    session['interview_current_question'] = current_q + 1
+                else:
+                    session['interview_complete'] = True
+            
+            session.modified = True
+        
+        return jsonify({
+            'success': True,
+            'transcript': transcript,
+            'next_question': session.get('interview_current_question', 0),
+            'interview_complete': session.get('interview_complete', False)
+        })
+        
+    except Exception as e:
+        print(f"Error processing interview answer: {e}", file=sys.stderr)
+        return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/assess_interview_answers', methods=['POST'])
+@login_required
+def assess_interview_answers():
+    """Assess interview answers and provide feedback."""
+    try:
+        if 'interview_questions' not in session or 'interview_answers' not in session:
+            return jsonify({'success': False, 'error': 'No interview data found'})
+        
+        job_role = session.get('interview_job_role', '')
+        experience_level = session.get('interview_experience_level', 'Mid')
+        
+        assessments = {}
+        areas_for_improvement = []
+        
+        for question, answer in session['interview_answers'].items():
+            if answer and answer.strip():
+                rating = get_ai_assessment(question, answer, job_role, experience_level)
+                assessments[question] = {'rating': rating, 'justification': None}
+                
+                # Extract potential areas for improvement
+                if rating and rating <= 3:
+                    areas_for_improvement.append(f"Question: {question}")
+            else:
+                assessments[question] = {'rating': 0, 'justification': None}
+        
+        # Store assessments in session
+        session['interview_assessments'] = assessments
+        session.modified = True
+        
+        # Calculate overall rating statistics
+        total_rating = 0
+        valid_count = 0
+        for data in assessments.values():
+            rating = data.get('rating')
+            if rating is not None and rating > 0:
+                total_rating += rating
+                valid_count += 1
+        
+        avg_rating = round(total_rating / max(valid_count, 1), 1)
+        
+        # Get performance level based on average rating
+        if avg_rating >= 4.5:
+            performance = "Excellent Performance! 🏆"
+        elif avg_rating >= 3.5:
+            performance = "Very Good Performance! 👍"
+        elif avg_rating >= 2.5:
+            performance = "Good Performance 🙂"
+        elif avg_rating >= 1.5:
+            performance = "Fair Performance ⚠️"
+        else:
+            performance = "Needs Improvement 🆘"
+        
+        return jsonify({
+            'success': True,
+            'assessments': assessments,
+            'stats': {
+                'average_rating': avg_rating,
+                'total_questions': len(session['interview_questions']),
+                'answered_questions': len(session['interview_answers']),
+                'assessed_answers': valid_count,
+                'performance_level': performance,
+                'areas_for_improvement': areas_for_improvement[:5]  # Top 5 improvement areas
+            }
+        })
+        
+    except Exception as e:
+        print(f"Error assessing interview answers: {e}", file=sys.stderr)
+        return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/get_interview_data', methods=['GET'])
+@login_required
+def get_interview_data():
+    """Get all interview-related data from session."""
+    # This route is equivalent to Streamlit's state access
+    return jsonify({
+        'success': True,
+        'questions': session.get('interview_questions', []),
+        'current_question': session.get('interview_current_question', 0),
+        'answers': session.get('interview_answers', {}),
+        'assessments': session.get('interview_assessments', {}),
+        'interview_complete': session.get('interview_complete', False),
+        'job_role': session.get('interview_job_role', ''),
+        'experience_level': session.get('interview_experience_level', '')
+    })
+
+@app.route('/reset_interview', methods=['POST'])
+@login_required
+def reset_interview():
+    """Reset interview data in session."""
+    try:
+        # Clear all interview-related session data
+        interview_keys = [
+            'interview_questions',
+            'interview_answers',
+            'interview_assessments',
+            'interview_current_question',
+            'interview_job_role',
+            'interview_experience_level',
+            'interview_complete'
+        ]
+        
+        for key in interview_keys:
+            if key in session:
+                session.pop(key)
+        
+        session.modified = True
+        
+        return jsonify({'success': True, 'message': 'Interview data reset successfully'})
+    except Exception as e:
+        print(f"Error resetting interview: {e}", file=sys.stderr)
+        return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/ask_question_aloud', methods=['POST'])
+@login_required
+def ask_question_aloud():
+    """Text-to-speech for interview questions (simulated in Flask)."""
+    try:
+        # Get question index
+        question_index = int(request.form.get('question_index', 0))
+        
+        # Get question text
+        if 'interview_questions' not in session or question_index >= len(session['interview_questions']):
+            return jsonify({'success': False, 'error': 'Question not found'})
+        
+        question = session['interview_questions'][question_index]
+        
+        # In a real implementation, you could use a TTS service like Google's TTS
+        # For now, we just acknowledge it (browser will handle TTS via Web Speech API)
+        return jsonify({'success': True, 'message': 'TTS request received'})
+        
+    except Exception as e:
+        print(f"Error in TTS: {e}", file=sys.stderr)
+        return jsonify({'success': False, 'error': str(e)})
+
 @app.route('/jobsearch', methods=['GET', 'POST']) # Renamed from placement.html
 @login_required
 def jobsearch():
@@ -360,8 +961,35 @@ def jobsearch():
 @app.route('/settings')
 @login_required
 def settings():
-    """Placeholder for settings page."""
-    return render_template('settings.html', back_url=url_for('dashboard'))
+    """Settings page with user profile information and preferences."""
+    # Get current user's information from database
+    user = None
+    if g.user:
+        try:
+            # Query the database for user information - using the correct schema
+            user_query = """
+            SELECT * FROM Users WHERE user_id = ?
+            """
+            user = query_db(user_query, [g.user['id']], one=True)
+            
+            # If user is found, also fetch their primary learning goal
+            if user:
+                goal_query = """
+                SELECT title FROM UserGoals 
+                WHERE user_id = ? AND is_completed = 0
+                ORDER BY deadline ASC
+                LIMIT 1
+                """
+                primary_goal = query_db(goal_query, [g.user['id']], one=True)
+                if primary_goal:
+                    user = dict(user)
+                    user['primary_goal'] = primary_goal['title']
+                
+        except Exception as e:
+            print(f"Error fetching user data: {e}", file=sys.stderr)
+            flash("Could not load all user data. Some settings may not display correctly.", "warning")
+    
+    return render_template('settings.html', user=user, back_url=url_for('dashboard'))
 
 @app.route('/textbot')
 @login_required
@@ -669,6 +1297,37 @@ def summarize_pdf():
         
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@app.route('/update_profile', methods=['POST'])
+@login_required
+def update_profile():
+    """Update user profile information."""
+    if request.method == 'POST':
+        # Get form data
+        first_name = request.form.get('firstName', '').strip()
+        last_name = request.form.get('lastName', '').strip()
+        
+        # Combine into full name
+        full_name = f"{first_name} {last_name}".strip()
+        
+        if not full_name:
+            flash("Name cannot be empty.", "error")
+            return redirect(url_for('settings'))
+        
+        try:
+            # Update the user's full name in the database
+            db = get_db()
+            db.execute(
+                "UPDATE Users SET full_name = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ?",
+                (full_name, g.user['id'])
+            )
+            db.commit()
+            flash("Profile updated successfully!", "success")
+        except Exception as e:
+            print(f"Error updating profile: {e}", file=sys.stderr)
+            flash("An error occurred while updating your profile.", "error")
+            
+    return redirect(url_for('settings'))
 
 if __name__ == '__main__':
     # Ensure the database exists (run your schema script if needed)

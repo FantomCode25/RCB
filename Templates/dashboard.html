@@ -256,10 +256,15 @@
                     <i class="fas fa-robot"></i>
                     <span>Textbook Bot</span>
                 </a>
-                <a href="{{ url_for('settings') }}" class="nav-item">
-                    <i class="fas fa-cog"></i>
-                    <span>Settings</span>
+                <a href="{{ url_for('ai_planner') }}" class="nav-item">
+                    <i class="fas fa-brain"></i>
+                    <span>AI Planner</span>
                 </a>
+                <a href="{{ url_for('interview_prep') }}" class="nav-item">
+                    <i class="fas fa-user-tie"></i>
+                    <span>Interview Prep</span>
+                </a>
+                
             </nav>
             <div class="sidebar-footer">
                 {% if g.user %}

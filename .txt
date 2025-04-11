@@ -1,7 +1,0 @@
-Forgot password  
-Some contents in home page
-Headings 
-Logo needs to be added 
-filter sort option in planner
-planner
-notification
