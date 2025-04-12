@@ -88,7 +88,26 @@
         /* --- Header/Navbar --- */
         .navbar { background-color: var(--navbar-bg); padding: 15px 0; position: fixed; width: 100%; top: 0; left: 0; z-index: 1000; box-shadow: 0 3px 12px var(--shadow-color); transition: background-color var(--transition-speed) ease; }
         .navbar .container { display: flex; justify-content: space-between; align-items: center; }
-        .navbar .logo { font-size: 1.8em; font-weight: 700; color: var(--navbar-logo-color); text-shadow: 1px 1px 2px rgba(0,0,0,0.5); transition: color var(--transition-speed) ease; }
+        .navbar .logo { 
+            font-size: 1.8em; 
+            font-weight: 700; 
+            color: var(--navbar-logo-color); 
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5); 
+            transition: color var(--transition-speed) ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        /* RCB Logo styling */
+        .rcb-logo {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%; /* Make it circular */
+            object-fit: cover; /* Ensure image fills the circle */
+            border: 2px solid var(--accent-gold); /* Add gold border */
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2); /* Subtle shadow */
+        }
         .navbar .nav-links ul { list-style: none; display: flex; align-items: center; gap: 5px; }
         .navbar .nav-links ul li { margin-left: 20px; } /* Reduced margin */
         .navbar .nav-links ul li a { color: var(--navbar-link-color); font-weight: 500; padding-bottom: 5px; position: relative; transition: color var(--transition-speed) ease; font-size: 0.95rem; }
@@ -208,7 +227,10 @@
 
     <header class="navbar">
         <div class="container">
-            <a href="{{ url_for('home') }}" class="logo">EnginSync</a> {# Use url_for for home link #}
+            <a href="{{ url_for('home') }}" class="logo">
+                <img src="{{ url_for('static', filename='img/ESCN.jpg') }}" alt="RCB Logo" class="rcb-logo">
+                EnginSync
+            </a> {# Use url_for for home link #}
             <nav class="nav-links">
                 <ul>
                     <li><a href="#features">Features</a></li>

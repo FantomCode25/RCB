@@ -107,17 +107,10 @@
         .form-group input:focus { outline: none; border-color: var(--accent-gold); box-shadow: 0 0 0 3px var(--shadow-color-glow); }
         .form-group button { flex-shrink: 0; }
 
-         /* Buttons */
-        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 20px; border-radius: 25px; font-weight: 500; letter-spacing: 0.5px; transition: all 0.3s ease; cursor: pointer; border: none; box-shadow: 0 2px 8px var(--shadow-color); text-align: center; font-size: 0.95rem; line-height: 1.3; }
-        .btn-primary { background-color: var(--accent-gold); color: var(--accent-black); font-weight: 600;}
-        .btn-primary:hover { background-color: #e6b325; transform: translateY(-2px); box-shadow: 0 4px 12px var(--shadow-color); }
-        .btn-secondary { background-color: var(--accent-red); color: white; }
-        .btn-secondary:hover { background-color: #c01822; transform: translateY(-2px); box-shadow: 0 4px 12px var(--shadow-color); }
-
         /* Results Area */
         .results-area h2 { font-size: 1.4rem; margin-bottom: 20px; color: var(--text-primary);}
         .error-message { color: var(--error-color); background-color: rgba(220, 53, 69, 0.1); border: 1px solid rgba(220, 53, 69, 0.2); padding: 15px; border-radius: var(--border-radius-md); font-weight: 500; }
-        body.dark-mode .error-message { background-color: rgba(207, 102, 121, 0.15); border-color: rgba(207, 102, 121, 0.3); }
+         body.dark-mode .error-message { background-color: rgba(207, 102, 121, 0.15); border-color: rgba(207, 102, 121, 0.3); }
         .no-results-message { color: var(--text-secondary); font-style: italic; text-align: center; padding: 20px; }
 
         /* Job Card Grid */
@@ -130,6 +123,7 @@
             display: flex; flex-direction: column;
         }
         .job-card:hover { transform: translateY(-5px); box-shadow: 0 6px 15px var(--shadow-color); }
+
         .job-card-header { display: flex; align-items: flex-start; gap: 15px; margin-bottom: 15px; }
         .job-icon { font-size: 1.8rem; color: var(--accent-red); width: 30px; text-align: center; margin-top: 3px;}
         .job-title-company { flex-grow: 1; }
@@ -138,6 +132,13 @@
         .job-location { font-size: 0.85rem; color: var(--text-secondary); display: flex; align-items: center; gap: 5px;}
         .job-location i { font-size: 0.9em; }
         .job-card .btn { margin-top: auto; /* Push button to bottom */ width: 100%; padding: 10px 15px; font-size: 0.9rem;}
+
+        /* Buttons */
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 20px; border-radius: 25px; font-weight: 500; letter-spacing: 0.5px; transition: all 0.3s ease; cursor: pointer; border: none; box-shadow: 0 2px 8px var(--shadow-color); text-align: center; font-size: 0.95rem; line-height: 1.3; }
+        .btn-primary { background-color: var(--accent-gold); color: var(--accent-black); font-weight: 600;}
+        .btn-primary:hover { background-color: #e6b325; transform: translateY(-2px); box-shadow: 0 4px 12px var(--shadow-color); }
+        .btn-secondary { background-color: var(--accent-red); color: white; }
+        .btn-secondary:hover { background-color: #c01822; transform: translateY(-2px); box-shadow: 0 4px 12px var(--shadow-color); }
 
         /* Responsive */
         @media (max-width: 768px) {
@@ -149,18 +150,19 @@
             .job-grid { grid-template-columns: 1fr; } /* Stack cards */
         }
         @media (max-width: 576px) {
-            body { padding: 10px; }
-            .container { padding: 15px 10px;}
-            h1 { font-size: 1.6rem; }
-            .search-form { padding: 20px; }
-            .job-card { padding: 15px; }
-            .job-card h3 { font-size: 1rem; }
+             body { padding: 10px; }
+             .container { padding: 15px 10px;}
+             h1 { font-size: 1.6rem; }
+             .search-form { padding: 20px; }
+             .job-card { padding: 15px; }
+             .job-card h3 { font-size: 1rem; }
          }
+
     </style>
 </head>
 <body class="light-mode"> <header class="header">
         <div class="header-left">
-             <a href="dashboard.html" class="btn-back" aria-label="Go Back">
+             <a href="{{ back_url or url_for('dashboard') }}" class="btn-back" aria-label="Go Back">
                  <i class="fas fa-arrow-left"></i>
              </a>
              </div>
@@ -176,7 +178,7 @@
         <form class="search-form" method="POST">
             <div class="form-group">
                 <label for="skills">Skills / Job Title</label>
-                <input type="text" id="skills" name="skills" placeholder="e.g., Python, Data Scientist" value="{{ search_skills or '' }}" required>
+                <input type="text" id="skills" name="skills" placeholder="e.g., Python, Data Scientist, Web Developer" value="{{ search_skills or '' }}" required>
             </div>
             <div class="form-group">
                 <label for="location">Location</label>
@@ -207,11 +209,7 @@
                         </div>
                         <p class="job-location">
                             <i class="fas fa-map-marker-alt"></i>
-                            {% if job.location and job.location.display_name %}
-                                {{ job.location.display_name }}
-                            {% else %}
-                                Location N/A
-                            {% endif %}
+                            {{ job.location.display_name or 'N/A' }}
                         </p>
                          <a href="{{ job.redirect_url }}" target="_blank" class="btn btn-secondary">View & Apply</a>
                     </div>
@@ -249,15 +247,20 @@
         if(themeToggleButton) { themeToggleButton.innerHTML = initialTheme === 'dark' ? '☀️' : '🌙'; themeToggleButton.setAttribute('title', initialTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'); }
         if (themeToggleButton) { themeToggleButton.addEventListener('click', () => { setTheme(body.classList.contains('dark-mode') ? 'light' : 'dark'); }); }
 
-        // --- Loading State ---
+        // --- Add potential JS for loading states or interactions here ---
         const form = document.querySelector('.search-form');
         const submitButton = form ? form.querySelector('button[type="submit"]') : null;
+        const resultsArea = document.querySelector('.results-area'); // To show loading
 
         if (form && submitButton) {
             form.addEventListener('submit', () => {
+                 // Optional: Show loading indicator visually near the results area
                  submitButton.textContent = 'Searching...';
                  submitButton.disabled = true;
-                 // Optionally add a visual spinner near results area
+                 if(resultsArea) {
+                    // You could add a spinner element here
+                 }
+                 // The page will reload via Flask, eventually removing the disabled state
             });
         }
 

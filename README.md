@@ -1,121 +1,165 @@
-# EnginSync Platform Frontend
+# 🚀 EnginSync:Cognitive Nexus
 
-EnginSync is an educational platform designed for engineering students that provides various modules for managing educational content, tracking progress, planning activities, and personalized learning experiences.
+**Team Name:** RCB 
+**Date:** 12/04/2025
 
-## Project Structure
+---
 
-The project is built with React and Redux Toolkit, using a modular approach to organize code by feature. Here's an overview of the main directories:
+## 📖 Table of Contents
 
-- `src/features/`: Contains feature-specific components organized by module
-  - `auth/`: Authentication components (Login, Register)
-  - `planner/`: Planner module for managing events and tasks
-  - `progress/`: Progress tracking and assessment components
-  - `courses/`: Course management and listing components
-  - `textbookbot/`: AI-powered assistant for answering questions about course materials
-  - `placement/`: Placement assessment module for personalizing learning paths
-  - `settings/`: User settings and preferences management
-  - `dashboard/`: Main dashboard overview components
+1. [Introduction](#-introduction)
+2. [Problem Statement](#-problem-statement)
+3. [Solution Overview](#-solution-overview)
+4. [Tech Stack](#-tech-stack)
+5. [Architecture / Diagram](#-architecture--diagram)
+6. [Installation & Usage](#-installation--usage)
+7. [Feature Achievements System](#-feature-achievements-system)
+8. [Team Members](#-team-members)
 
-- `src/store/`: Redux state management
-  - `index.js`: Root Redux store configuration
-  - `slices/`: Redux Toolkit slices for state management
-  - `api/`: RTK Query API services organized by feature
+---
 
-- `src/components/`: Shared UI components used across features
-  - `layout/`: Layout components including navigation and common UI elements
+## 🧠 Introduction
 
-## Getting Started
+EnginSync:Cognitive Nexus is an AI-powered educational platform designed to enhance students' learning experience through intelligent content processing, interactive learning materials, personalized study planning, and professional development preparation. It serves as a comprehensive assistant that helps students better understand complex materials, prepare for interviews, organize their studies, and track their learning progress.
+
+---
+
+## ❗ Problem Statement
+
+Students face numerous challenges in their educational journey:
+
+1. **Information Overload**: Textbooks and study materials can be overwhelming and difficult to digest efficiently.
+2. **Preparation Gap**: Students often lack structured preparation for technical interviews and professional environments.
+3. **Study Organization**: Many students struggle with creating effective study plans and organizing their learning materials.
+4. **Engagement & Motivation**: Traditional learning methods often fail to keep students engaged over time.
+5. **Content Accessibility**: Complex technical content isn't always presented in an accessible, digestible format.
+
+---
+
+## ✅ Solution Overview
+
+RCB Assistant tackles these challenges through a comprehensive suite of AI-powered tools and features:
+
+### Key Features
+
+- **AI-powered PDF Processing & Summarization**: Extract, summarize, and convert text-to-speech from study materials.
+- **Interview Preparation System**: Generate personalized interview questions based on uploaded resumes, record and assess answers with AI feedback.
+- **Intelligent Study Planning**: AI-generated study plans based on user input and learning goals.
+- **YouTube Learning Integration**: Search and integrate relevant educational videos based on study topics.
+- **DSA Practice Module**: Organized practice problems for Data Structures and Algorithms with progress tracking.
+- **Interactive Dashboard**: Centralized view of learning progress, upcoming tasks, and recommended activities.
+- **Voice Interaction**: Record responses and get transcriptions, enabling hands-free learning.
+
+### Unique Value Proposition
+
+EnginSync:Cognitive Nexus combines multiple learning technologies into one cohesive platform, creating a personalized learning experience that adapts to each student's needs, making education more accessible, engaging, and effective.
+
+---
+
+## 🛠️ Tech Stack
+
+- **Frontend:** Flask Templates with HTML, CSS, JavaScript
+- **Backend:** Python, Flask
+- **Database:** SQLite
+- **AI & ML:** 
+  - Google Generative AI (Gemini models)
+  - OpenAI API
+  - NLTK for Natural Language Processing
+  - Whisper for Speech-to-Text
+- **APIs / Services:** 
+  - YouTube Data API
+  - Google Text-to-Speech (gTTS)
+  - Adzuna Job Search API
+- **Document Processing:** 
+  - PyMuPDF (fitz) for PDF handling
+  - Markdown for content rendering
+- **Audio Processing:** 
+  - SoundDevice for audio recording
+  - SciPy for audio file operations
+
+---
+
+## 🧩 Architecture / Diagram
+
+EnginSync:Cognitive Nexus follows a modular architecture organized around key functional areas:
+
+```
+EnginSync:Cognitive Nexus
+│
+├── Core Services
+│   ├── Authentication & User Management
+│   ├── Database Management
+│   └── Session Management
+│
+├── Content Processing Engine
+│   ├── PDF Parser & Extractor
+│   ├── Text Summarization (NLTK & AI-based)
+│   ├── Text-to-Speech Generation
+│   └── YouTube Content Integration
+│
+├── AI Interaction Layer
+│   ├── Gemini Models Integration
+│   ├── OpenAI Integration
+│   ├── Voice Recording & Processing
+│   └── Speech-to-Text Transcription
+│
+├── Learning Management
+│   ├── Study Plan Generation
+│   ├── Progress Tracking
+│   ├── DSA Practice System
+│   └── Achievements System
+│
+└── Career Development Tools
+    ├── Interview Preparation System
+    ├── Resume Analysis
+    ├── Answer Assessment
+    └── Job Search Integration
+```
+
+---
+
+## 🧪 Installation & Usage
 
 ### Prerequisites
 
-- Node.js (v14.0 or later)
-- npm (v6.0 or later)
+- Python 3.8 or later
+- pip (Python package manager)
+- Dependencies listed in `requirements.txt`
 
-### Installation
+### Steps
 
-1. Clone the repository
-2. Install dependencies:
-   ```
-   npm install
-   ```
-3. Start the development server:
-   ```
-   npm start
-   ```
+```bash
+# Clone the repository
+git clone https://github.com/FantomCode25/RCB.git
 
-The application will be available at `http://localhost:3000`.
+# Navigate into the project directory
+cd RCB_FC
 
-## API Integration
+# Install dependencies
+pip install -r requirements.txt
 
-The frontend is designed to work with a Flask backend following the API specifications defined in the `enginsync-api-docs` directory. The RTK Query services are already set up to connect with the corresponding backend endpoints.
+# Set up environment variables (optional)
+# Create a .env file with your API keys:
+# GEMINI_API_KEY=your_gemini_api_key
+# OPENAI_API_KEY=your_openai_api_key
+# YOUTUBE_API_KEY=your_youtube_api_key
 
-## Features
-
-### Authentication
-
-- JWT-based authentication with token refresh mechanism
-- Secure user login and registration
-- Protected routes requiring authentication
-
-### Planner Module
-
-- Create, view, update, and delete tasks and events
-- Calendar view for visualizing scheduled items
-- Upcoming and today's events widgets
-
-### Progress Tracking
-
-- Course completion tracking
-- Assessment results and analytics
-- Learning goal management
-
-### Adaptive Learning
-
-- Personalized learning profiles
-- Custom study plans based on performance
-- Recommendations for learning resources
-
-### User Interface
-
-- Modern Material-UI components
-- Responsive design for desktop and mobile
-- Intuitive navigation and user experience
-
-## Development
-
-### State Management
-
-The application uses Redux Toolkit for state management with RTK Query for API calls. Each feature has its own API slice for handling data fetching, caching, and updates.
-
-### Authentication Flow
-
-1. User logs in, receiving an access token and refresh token
-2. Access token is stored in Redux state and used for API requests
-3. If the access token expires, the refresh token is used to request a new one
-4. If the refresh token is invalid, the user is logged out
-
-### Adding New Features
-
-1. Create a new directory in `src/features/` for the feature
-2. Add the feature's components in this directory
-3. Create an API slice in `src/store/api/` if needed
-4. Update the Redux store to include the new slice
-5. Add routes to `App.js`
-
-## Deployment
-
-To build the application for production:
-
-```
-npm run build
+# Run the application
+python app.py
 ```
 
-This will create an optimized production build in the `build` directory, which can be deployed to any static hosting service.
+The application will be available at `http://localhost:5000`
 
-## Backend Integration
+---
 
-This frontend application is designed to be paired with a Flask backend that implements the API specifications defined in the `enginsync-api-docs` directory.
+## 👥 Team Members
 
-## License
+- Pavithra C - Lead Developer and Frontend Developer
+- Niranjan MS - Developer and Backend Developer
+- Mishael Abhishek - Developer and Backend Developer
+- Sahana Jain - Tester and QA Engineer
+- Team RCB
 
-[MIT License](LICENSE)
+---
+
+*This README is maintained by the RCB*

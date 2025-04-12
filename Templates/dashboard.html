@@ -78,15 +78,21 @@
             border-bottom: 1px solid var(--border-color);
             flex-shrink: 0;
         }
-         .sidebar-rcb-logo { /* Style for your logo image if you add one */
-            height: 35px; /* Example size */
-            width: auto;
-            vertical-align: middle; /* Helps alignment with text */
+         /* Logo styling */
+         .rcb-logo { 
+            width: 50px; /* Control the size */
+            height: 50px;
+            border-radius: 50%; /* Make it circular */
+            object-fit: cover; /* Ensure image fills the circle */
+            border: 2px solid var(--accent-gold); /* Add gold border */
+            vertical-align: middle;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2); /* Subtle shadow */
          }
-         /* Placeholder icon style */
+         /* Icon container */
          .sidebar-logo-icon {
-             font-size: 1.8em;
-             color: var(--accent-red); /* Red icon */
+             display: flex;
+             align-items: center;
+             justify-content: center;
              line-height: 1;
          }
          .sidebar-logo-text {
@@ -237,8 +243,11 @@
     <div class="app-container">
         <aside class="sidebar">
             <div class="sidebar-header">
-                 <span class="sidebar-logo-icon" title="EnginSync Logo">🚀</span> <span class="sidebar-logo-text">EnginSync</span>
-             </div>
+                <div class="sidebar-logo-icon" title="EnginSync Logo">
+                    <img src="{{ url_for('static', filename='img/ESCN.jpg') }}" alt="RCB Logo" class="rcb-logo">
+                </div>
+                <span class="sidebar-logo-text">EnginSync</span>
+            </div>
             <nav class="sidebar-nav">
                  <a href="{{ url_for('dashboard') }}" class="nav-item active">
                     <i class="fas fa-home"></i>
@@ -263,6 +272,10 @@
                 <a href="{{ url_for('interview_prep') }}" class="nav-item">
                     <i class="fas fa-user-tie"></i>
                     <span>Interview Prep</span>
+                </a>
+                <a href="{{ url_for('practice') }}" class="nav-item">
+                    <i class="fas fa-code"></i>
+                    <span>DSA Practice</span>
                 </a>
                 
             </nav>
@@ -303,9 +316,6 @@
                  <div class="header-title">Dashboard</div>
                 <div class="header-actions">
                     <span class="welcome-text">Welcome, {{ full_name.split(' ')[0] }}</span>
-                    <div class="notification-icon">
-                        <i class="fas fa-bell"></i>
-                        <span class="notification-badge">3</span> </div>
                     <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
                         </button>
                 </div>
