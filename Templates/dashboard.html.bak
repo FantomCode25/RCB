@@ -31,7 +31,6 @@
             --flash-bg-success: rgba(40, 167, 69, 0.1); --flash-border-success: var(--success-color);
             --flash-bg-info: rgba(23, 162, 184, 0.1); --flash-border-info: var(--info-color);
             --flash-bg-warning: rgba(255, 193, 7, 0.1); --flash-border-warning: var(--warning-color);
-            --chart-grid-color: rgba(0,0,0,0.08); /* Added for chart grids */
         }
         body.dark-mode {
             --bg-primary: #111111; --bg-secondary: #1a1a1a; --bg-accent: #000000;
@@ -47,7 +46,6 @@
             --flash-bg-success: rgba(40, 167, 69, 0.15);
             --flash-bg-info: rgba(23, 162, 184, 0.15);
             --flash-bg-warning: rgba(255, 193, 7, 0.15);
-            --chart-grid-color: rgba(255,255,255,0.1); /* Added for chart grids */
         }
         /* --- Global Styles --- */
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -78,21 +76,21 @@
             text-align: center;
             animation: fadeInScale 1.2s ease-out forwards;
         }
-
+        
         .logo-container {
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 15px;
         }
-
+        
         .logo-icon {
             display: flex;
             align-items: center;
             justify-content: center;
         }
-
-        .rcb-logo {
+        
+        .rcb-logo { 
             width: 180px; /* Extra large logo */
             height: 180px;
             border-radius: 50%;
@@ -100,7 +98,7 @@
             border: 6px solid var(--accent-gold);
             box-shadow: 0 0 50px var(--shadow-color-glow);
         }
-
+        
         .logo-text {
             font-size: 2.5em; /* Larger text */
             font-weight: 700;
@@ -108,7 +106,7 @@
             text-shadow: 0 3px 8px var(--shadow-color);
             letter-spacing: 1px;
         }
-
+        
         /* --- Bubble Navigation --- */
         #bubble-nav-container {
             position: absolute;
@@ -116,7 +114,7 @@
             height: 100%;
             pointer-events: none; /* Let clicks pass through to bubbles */
         }
-
+        
         .nav-bubble {
             position: absolute;
             border-radius: 50%;
@@ -127,7 +125,7 @@
             align-items: center;
             justify-content: center;
             /* Enhanced shadow for more professional look */
-            box-shadow: 0 8px 25px rgba(0,0,0,0.2),
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2), 
                         inset 0 -2px 10px rgba(255,255,255,0.07),
                         inset 0 2px 5px rgba(255,255,255,0.15);
             cursor: pointer;
@@ -147,21 +145,19 @@
             /* No transitions on position - static placement */
             transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
         }
-
+        
         /* Special styling removed since dashboard bubble is gone */
-
-        /* MODIFIED: Slightly larger icon font size and margin */
+        
         .nav-bubble i {
-            font-size: 2.8em;
-            margin-bottom: 12px;
+            font-size: 2.6em; /* Extra large icons */
+            margin-bottom: 10px;
             color: var(--accent-gold);
             /* Enhanced glow effect */
             filter: drop-shadow(0 0 8px rgba(255, 199, 44, 0.4));
         }
-
-        /* MODIFIED: Slightly larger text font size */
+        
         .nav-bubble span {
-            font-size: 1.3em;
+            font-size: 1.2em; /* Larger text */
             max-width: 85%;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -170,14 +166,14 @@
             letter-spacing: 0.5px;
             text-shadow: 0 1px 2px rgba(0,0,0,0.2);
         }
-
+        
         .nav-bubble:hover {
             transform: scale(1.15);
-            box-shadow: 0 10px 30px var(--shadow-color-glow),
-                        inset 0 -3px 10px rgba(255,255,255,0.1);
+            box-shadow: 0 10px 30px var(--shadow-color-glow), 
+                      inset 0 -3px 10px rgba(255,255,255,0.1);
             border-color: var(--accent-gold);
         }
-
+        
         /* Bubble hover descriptions */
         .bubble-description {
             position: absolute;
@@ -196,31 +192,31 @@
             transform: translateY(10px);
             line-height: 1.5;
         }
-
+        
         .bubble-description.left {
             right: calc(100% + 20px);
             text-align: right;
         }
-
+        
         .bubble-description.right {
             left: calc(100% + 20px);
             text-align: left;
         }
-
+        
         .bubble-description h4 {
             margin: 0 0 10px 0;
             color: var(--accent-gold);
             font-size: 1.3em;
             font-weight: 700;
         }
-
+        
         .bubble-description p {
             margin: 0;
             line-height: 1.5;
             color: var(--text-primary);
             font-size: 0.95em;
         }
-
+        
         .bubble-description:after {
             content: '';
             position: absolute;
@@ -230,38 +226,39 @@
             top: 50%;
             transform: translateY(-50%);
         }
-
+        
         .bubble-description.left:after {
             border-width: 8px 0 8px 8px;
             border-color: transparent transparent transparent var(--accent-gold);
             right: -8px;
         }
-
+        
         .bubble-description.right:after {
             border-width: 8px 8px 8px 0;
             border-color: transparent var(--accent-gold) transparent transparent;
             left: -8px;
         }
-
+        
         .nav-bubble:hover .bubble-description {
             opacity: 1;
             visibility: visible;
             transform: translateY(0);
         }
+        
 
-
+        
         .nav-bubble.active {
             background-color: var(--accent-gold);
             color: var(--accent-black);
-            box-shadow: 0 8px 30px rgba(255, 199, 44, 0.4),
-                        inset 0 -2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 8px 30px rgba(255, 199, 44, 0.4), 
+                      inset 0 -2px 10px rgba(0,0,0,0.1);
         }
-
+        
         .nav-bubble.active i {
             color: var(--accent-black);
             filter: none;
         }
-
+        
         /* --- User Panel --- */
         #user-panel {
             position: fixed;
@@ -283,19 +280,19 @@
         .user-info { display: flex; align-items: center; }
         .user-avatar { width: 40px; height: 40px; border-radius: 50%; background-color: var(--accent-red); display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; margin-right: 10px; font-size: 0.9em; text-transform: uppercase; }
         .user-details { flex: 1; overflow: hidden; /* Prevent long names breaking layout */}
-        .user-name {
-            font-weight: 700;
+        .user-name { 
+            font-weight: 700; 
             font-size: 1.1em;
             background: linear-gradient(45deg, var(--accent-red), var(--accent-gold));
             background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             text-shadow: 0 1px 1px rgba(0,0,0,0.1);
-            white-space: nowrap;
-            overflow: hidden;
+            white-space: nowrap; 
+            overflow: hidden; 
             text-overflow: ellipsis;
             letter-spacing: 0.5px;
-        }
+        } 
         .user-role { font-size: 0.8em; color: var(--text-primary); font-weight: 500; }
         .logout-btn { margin-top: 15px; width: 100%; display: flex; justify-content: center; align-items: center; }
         .logout-btn i { margin-right: 8px;}
@@ -309,7 +306,7 @@
             scroll-behavior: smooth;
             scroll-padding-top: 60px;
         }
-
+        
         /* Dashboard header title */
         .dashboard-title {
             position: fixed;
@@ -325,45 +322,40 @@
             box-shadow: 0 4px 15px var(--shadow-color);
             animation: fadeIn 0.5s ease-out forwards;
         }
-
-        /* Welcome message CSS is removed */
-
+        
+        /* Welcome message removed */
+        
         /* --- Animations --- */
         @keyframes fadeInScale {
             0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
             100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
         }
-
+        
         @keyframes bubbleFadeIn {
             0% { opacity: 0; transform: scale(0.5); }
             70% { opacity: 1; transform: scale(1.1); }
             100% { opacity: 1; transform: scale(1); }
         }
-
+        
         @keyframes slideInRight {
             0% { transform: translateX(50px); opacity: 0; }
             100% { transform: translateX(0); opacity: 1; }
         }
-
+        
         @keyframes popEffect {
             0% { transform: scale(1); }
             50% { transform: scale(1.2); }
             100% { transform: scale(0); opacity: 0; }
         }
-
-        @keyframes fadeIn { /* Used for Dashboard Title and Theme Toggle */
-             0% { opacity: 0; }
-             100% { opacity: 1; }
-        }
-
+        
         /* fadeInOut animation removed */
-
+        
         /* --- Feature Highlights Section --- */
         #feature-highlights {
             margin-top: 100vh;
             padding: 40px 0;
         }
-
+        
         .section-title {
             text-align: center;
             font-size: 2.5em;
@@ -373,7 +365,7 @@
             position: relative;
             padding-bottom: 15px;
         }
-
+        
         .section-title:after {
             content: '';
             position: absolute;
@@ -385,7 +377,7 @@
             background: linear-gradient(90deg, var(--accent-gold), var(--accent-red));
             border-radius: 2px;
         }
-
+        
         .feature-card {
             display: flex;
             background-color: var(--card-bg);
@@ -398,12 +390,12 @@
             transition: all 0.6s ease-out;
             border: 1px solid var(--border-color);
         }
-
+        
         .feature-card.visible {
             opacity: 1;
             transform: translateY(0);
         }
-
+        
         .feature-icon {
             width: 120px;
             flex-shrink: 0;
@@ -415,36 +407,36 @@
             font-size: 3em;
             transition: all 0.3s ease;
         }
-
+        
         .feature-content {
             padding: 25px;
             flex-grow: 1;
         }
-
+        
         .feature-content h3 {
             margin-top: 0;
             margin-bottom: 15px;
             font-size: 1.8em;
             color: var(--text-primary);
         }
-
+        
         .feature-content p {
             margin-bottom: 20px;
             font-size: 1.1em;
             line-height: 1.6;
             color: var(--text-secondary);
         }
-
+        
         .feature-content ul {
             padding-left: 20px;
             margin-bottom: 20px;
         }
-
+        
         .feature-content li {
             margin-bottom: 8px;
             color: var(--text-secondary);
         }
-
+        
         .feature-link {
             display: inline-block;
             padding: 10px 20px;
@@ -455,36 +447,39 @@
             font-weight: 500;
             transition: all 0.3s ease;
         }
-
+        
         .feature-link:hover {
             background-color: var(--accent-red);
             color: white;
             transform: translateX(5px);
         }
-
+        
         /* Dark mode specific styling */
         body.dark-mode .feature-icon {
             background-color: rgba(0, 0, 0, 0.3);
             color: var(--accent-red);
         }
-
+        
         body.dark-mode .feature-card {
             border: 1px solid rgba(255, 199, 44, 0.2);
             background-color: rgba(26, 26, 26, 0.8);
         }
-
+        
         body.dark-mode .feature-link {
             background-color: var(--accent-red);
             color: white;
         }
-
+        
         body.dark-mode .feature-link:hover {
             background-color: var(--accent-gold);
             color: var(--accent-black);
         }
 
         /* Theme Toggle Button (Emoji Only in Header) */
-        /* (Note: Theme Toggle is now in its own container, see below) */
+        .theme-toggle { background: none; border: none; color: var(--theme-toggle-color-light); width: auto; height: auto; padding: 0; border-radius: 0; cursor: pointer; transition: color 0.3s ease; display: flex; align-items: center; justify-content: center; font-size: 1.5em; }
+        .theme-toggle:hover { background: none; color: var(--theme-toggle-hover-light); }
+        body.dark-mode .theme-toggle { color: var(--theme-toggle-color-dark); }
+        body.dark-mode .theme-toggle:hover { background: none; color: var(--theme-toggle-hover-dark); }
 
         .content { padding: 30px; }
 
@@ -500,8 +495,13 @@
          body.dark-mode .alert-info { color: #aae0ff; }
          body.dark-mode .alert-warning { color: #fff0aa; }
 
-        /* User Welcome CSS is removed */
-
+        /* --- User Welcome Element --- */
+        .welcome-text {
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-right: 15px;
+        }
+        
         /* --- Dashboard Components --- */
         .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 30px; margin-bottom: 30px; }
         .dashboard-card { background-color: var(--card-bg); border-radius: 10px; box-shadow: 0 5px 15px var(--shadow-color); padding: 25px; transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease; border: 1px solid var(--border-color); }
@@ -529,11 +529,11 @@
             color: var(--text-primary);
             font-size: 0.9em;
         }
-
+        
         /* --- Progress Module Specific Styles --- */
         /* Make specific widget headings gold */
         .progress-widget > h3,
-        .detailed-progress-view > h3 {
+        .detailed-progress-view > h3 { 
             color: var(--accent-gold);
             font-size: 1.3rem;
             border-bottom: none;
@@ -554,7 +554,7 @@
             z-index: 100;
             animation: fadeIn 0.5s ease-out forwards;
         }
-
+        
         .theme-toggle {
             background: none;
             border: none;
@@ -569,19 +569,9 @@
             align-items: center;
             justify-content: center;
         }
-
+        
         .theme-toggle:hover {
             transform: rotate(30deg) scale(1.1);
-            /* Remove background hover effect */
-            background: none;
-        }
-
-        body.dark-mode .theme-toggle {
-             color: var(--theme-toggle-color-dark);
-        }
-        body.dark-mode .theme-toggle:hover {
-             background: none;
-             color: var(--theme-toggle-hover-dark);
         }
 
         /* --- Responsive --- */
@@ -589,55 +579,41 @@
             .rcb-logo { width: 100px; height: 100px; }
             .logo-text { font-size: 2em; }
             #user-panel { min-width: 180px; }
-            .theme-toggle { font-size: 26px; } /* Consistent size */
-            .dashboard-title { font-size: 1.8em; padding: 8px 15px;}
-            #theme-toggle-container { top: 15px; right: 15px;}
-            #user-panel { bottom: 15px; right: 15px; padding: 12px;}
-            .feature-card { flex-direction: column; }
-            .feature-icon { width: 100%; height: 80px; font-size: 2.5em;}
-            .feature-content { padding: 20px;}
-            .bubble-description { width: 200px; font-size: 0.9em;}
+            .theme-toggle { font-size: 26px; }
         }
-
+        
         @media (max-width: 576px) {
             .rcb-logo { width: 90px; height: 90px; }
             .logo-text { font-size: 1.8em; }
-            .dashboard-title { font-size: 1.6em; }
-             #user-panel {
-                 min-width: 160px;
-                 padding: 10px;
-            }
-            .user-name { font-size: 1em; }
-            .logout-btn { font-size: 0.9em; padding: 8px 15px;}
-            .section-title { font-size: 2em;}
-            .feature-content h3 { font-size: 1.5em;}
-            .feature-content p { font-size: 1em;}
-            .feature-link { font-size: 0.9em; padding: 8px 16px;}
-            .nav-bubble span { font-size: 1em; } /* Adjusted bubble text for smaller screen */
-             .nav-bubble i { font-size: 2.2em; } /* Adjusted bubble icon for smaller screen */
         }
     </style>
 </head>
 <body>
     <div class="app-container">
+        <!-- Central Logo Area -->
+        <!-- Dashboard title in header -->
         <div class="dashboard-title">Dashboard</div>
-
+        
         <div id="central-logo">
             <div class="logo-container">
                 <div class="logo-icon" title="EnginSync Logo">
-                    <img src="{{ url_for('static', filename='img/ESCN.jpg') }}" alt="EnginSync Logo" class="rcb-logo">
+                    <img src="{{ url_for('static', filename='img/ESCN.jpg') }}" alt="RCB Logo" class="rcb-logo">
                 </div>
                 <div class="logo-text">EnginSync</div>
             </div>
         </div>
-
+        
+        <!-- Bubble Navigation -->
         <div id="bubble-nav-container">
-            </div>
-
+            <!-- Bubbles will be created by JavaScript -->
+        </div>
+        
+        <!-- Theme Toggle Container (Top Right) -->
         <div id="theme-toggle-container">
             <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme"></button>
         </div>
-
+        
+        <!-- User Info Floating Panel (Bottom Right) -->
         <div id="user-panel">
             {% if g.user %}
             <div class="user-info">
@@ -651,7 +627,7 @@
                 </div>
                 <div class="user-details">
                     <div class="user-name">{{ g.user.full_name }}</div>
-                    </div>
+                </div>
             </div>
             <a href="{{ url_for('logout') }}" class="btn btn-secondary logout-btn">
                 <i class="fas fa-sign-out-alt"></i> Logout
@@ -668,7 +644,8 @@
             </a>
             {% endif %}
         </div>
-
+        
+        <!-- Navigation Data (hidden) - Dashboard bubble removed -->
         <div id="nav-data" style="display: none;">
             <div class="nav-item" data-href="{{ url_for('planner') }}" data-icon="fa-calendar-alt">Game Plan</div>
             <div class="nav-item" data-href="{{ url_for('jobsearch') }}" data-icon="fa-briefcase">The Chase</div>
@@ -678,6 +655,7 @@
             <div class="nav-item" data-href="{{ url_for('practice') }}" data-icon="fa-code">Training</div>
         </div>
 
+        <!-- Content Container -->
         <div id="content-container">
 
             <div class="content">
@@ -697,10 +675,12 @@
                         </div>
                     {% endif %}
                 {% endwith %}
-
+                
+                <!-- Feature descriptions that appear on scroll -->
                 <div id="feature-highlights">
                     <div class="section-title">Feature Highlights</div>
-
+                    
+                    <!-- Planner Feature -->
                     <div class="feature-card" data-feature="planner">
                         <div class="feature-icon"><i class="fas fa-calendar-alt"></i></div>
                         <div class="feature-content">
@@ -714,7 +694,8 @@
                             <a href="{{ url_for('planner') }}" class="feature-link">Open Planner <i class="fas fa-arrow-right"></i></a>
                         </div>
                     </div>
-
+                    
+                    <!-- Job Search Feature -->
                     <div class="feature-card" data-feature="jobsearch">
                         <div class="feature-icon"><i class="fas fa-briefcase"></i></div>
                         <div class="feature-content">
@@ -728,7 +709,8 @@
                             <a href="{{ url_for('jobsearch') }}" class="feature-link">Search Jobs <i class="fas fa-arrow-right"></i></a>
                         </div>
                     </div>
-
+                    
+                    <!-- Textbook Bot Feature -->
                     <div class="feature-card" data-feature="textbot">
                         <div class="feature-icon"><i class="fas fa-robot"></i></div>
                         <div class="feature-content">
@@ -742,7 +724,8 @@
                             <a href="{{ url_for('textbot') }}" class="feature-link">Open Assistant <i class="fas fa-arrow-right"></i></a>
                         </div>
                     </div>
-
+                    
+                    <!-- AI Planner Feature -->
                     <div class="feature-card" data-feature="ai_planner">
                         <div class="feature-icon"><i class="fas fa-brain"></i></div>
                         <div class="feature-content">
@@ -756,7 +739,8 @@
                             <a href="{{ url_for('ai_planner') }}" class="feature-link">Generate Plan <i class="fas fa-arrow-right"></i></a>
                         </div>
                     </div>
-
+                    
+                    <!-- Interview Prep Feature -->
                     <div class="feature-card" data-feature="interview_prep">
                         <div class="feature-icon"><i class="fas fa-user-tie"></i></div>
                         <div class="feature-content">
@@ -770,7 +754,8 @@
                             <a href="{{ url_for('interview_prep') }}" class="feature-link">Start Practicing <i class="fas fa-arrow-right"></i></a>
                         </div>
                     </div>
-
+                    
+                    <!-- DSA Practice Feature -->
                     <div class="feature-card" data-feature="practice">
                         <div class="feature-icon"><i class="fas fa-code"></i></div>
                         <div class="feature-content">
@@ -792,14 +777,16 @@
     <script>
         // --- Static Bubble Navigation System ---
         document.addEventListener('DOMContentLoaded', function() {
+            // Welcome message removed
+            
             // Feature cards scroll animation
             const featureCards = document.querySelectorAll('.feature-card');
-
+            
             // Set initial delays for staggered appearance
             featureCards.forEach((card, index) => {
                 card.style.transitionDelay = `${index * 0.1}s`;
             });
-
+            
             // Intersection Observer for scroll animations
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
@@ -810,206 +797,229 @@
             }, {
                 root: null,
                 rootMargin: '0px',
-                threshold: 0.15 // Make visible when 15% is in view
+                threshold: 0.15
             });
-
+            
             // Observe all feature cards
             featureCards.forEach(card => {
                 observer.observe(card);
             });
+            // Get viewport dimensions
+            let viewportWidth = window.innerWidth;
+            let viewportHeight = window.innerHeight;
+            
+            // Generate navigation bubbles
+            const navItems = document.querySelectorAll('#nav-data .nav-item');
+            const bubbleContainer = document.getElementById('bubble-nav-container');
+            const bubbleSize = Math.min(viewportWidth, viewportHeight) * 0.2; // Extra large bubbles
+            
+            // Calculate center point
+            const centerX = viewportWidth / 2;
+            const centerY = viewportHeight / 2;
+            
+            // Calculate the ideal distance from center based on available space
+            const distance = Math.min(viewportWidth, viewportHeight) * 0.42; // 42% of the smaller viewport dimension
+            
+            // Create a bubble for each navigation item in perfect circle
+            // Define custom descriptions for each feature
+            const bubbleDescriptions = {
+                'Game Plan': 'Organize your study schedule with our intelligent planner that adapts to your learning style and personal goals.',
+                'The Chase': 'Find perfect career opportunities tailored to your skills and experience with our advanced job search tool.',
+                'All Rounder': 'Get instant answers and explanations from your textbooks with our powerful AI-powered assistant.',
+                'Strategic Time Out': 'Let our advanced AI create personalized study plans optimized for your specific learning goals.',
+                'Coach': 'Practice and prepare for technical interviews with comprehensive tools and realistic mock interviews.',
+                'Training': 'Master data structures and algorithms with our curated collection of practice problems tailored to your skill level.'
+            };
 
-            // --- Bubble Navigation Generation ---
-            function generateBubbles() {
-                const navItems = document.querySelectorAll('#nav-data .nav-item');
-                const bubbleContainer = document.getElementById('bubble-nav-container');
-                bubbleContainer.innerHTML = ''; // Clear existing bubbles before regenerating
-
-                // Get viewport dimensions
-                let viewportWidth = window.innerWidth;
-                let viewportHeight = window.innerHeight;
-
-                // Calculate bubble size based on viewport, with min/max constraints
-                // MODIFIED: Increased multiplier and min/max values
-                let bubbleSize = Math.min(viewportWidth, viewportHeight) * 0.22; // Increased percentage
-                bubbleSize = Math.max(120, Math.min(bubbleSize, 180)); // Min 120px, Max 180px
-
-                // Calculate center point
+            navItems.forEach((item, index) => {
+                // Create the visual bubble element
+                const bubble = document.createElement('div');
+                bubble.className = 'nav-bubble';
+                
+                // Calculate exact position in perfect circle around the center
+                const angle = (Math.PI * 2 / navItems.length) * index;
+                const x = centerX + Math.cos(angle) * distance;
+                const y = centerY + Math.sin(angle) * distance;
+                
+                // Set bubble content (icon and text)
+                bubble.innerHTML = `
+                    <i class="fas ${item.dataset.icon}"></i>
+                    <span>${item.textContent}</span>
+                `;
+                
+                // Create and add hover description
+                const description = document.createElement('div');
+                // Determine if bubble is on left or right side of circle
+                const isLeftSide = x < centerX;
+                description.className = `bubble-description ${isLeftSide ? 'left' : 'right'}`;
+                
+                // Set description content based on feature
+                const featureName = item.textContent;
+                const title = document.createElement('h4');
+                title.textContent = featureName;
+                description.appendChild(title);
+                
+                const desc = document.createElement('p');
+                
+                switch(featureName.toLowerCase()) {
+                    case 'planner':
+                        desc.textContent = 'Create customized study schedules, set deadlines, and track your progress. Our intelligent planner adapts to your learning style.';
+                        break;
+                    case 'job search':
+                        desc.textContent = 'Find the perfect career opportunities tailored to your skills and experience with advanced filtering and personalized recommendations.';
+                        break;
+                    case 'textbook bot':
+                        desc.textContent = 'Get instant answers from your textbooks with our AI-powered assistant. Upload PDFs, ask questions, and generate study notes.';
+                        break;
+                    case 'ai planner':
+                        desc.textContent = 'Let our advanced AI create personalized study plans optimized for your specific learning goals and timeline.';
+                        break;
+                    case 'interview prep':
+                        desc.textContent = 'Practice with real interview questions, get feedback on your answers, and prepare for technical interviews.';
+                        break;
+                    case 'dsa practice':
+                        desc.textContent = 'Master data structures and algorithms with hundreds of curated practice problems across different difficulty levels.';
+                        break;
+                    default:
+                        desc.textContent = 'Access this feature to enhance your learning experience with EnginSync.';
+                }
+                
+                description.appendChild(desc);
+                bubble.appendChild(description);
+                
+                // Position the bubble (static, no movement)
+                bubble.style.left = `${x - bubbleSize/2}px`;
+                bubble.style.top = `${y - bubbleSize/2}px`;
+                bubble.style.width = `${bubbleSize}px`;
+                bubble.style.height = `${bubbleSize}px`;
+                
+                // Set unique animation delay
+                bubble.style.setProperty('--delay', index + 1);
+                
+                // Add click handler for navigation
+                bubble.addEventListener('click', () => {
+                    // Create pop effect
+                    bubble.style.animation = 'popEffect 0.4s ease-out forwards';
+                    
+                    // Navigate to the target page after animation
+                    setTimeout(() => {
+                        window.location.href = item.dataset.href;
+                    }, 300);
+                });
+                
+                bubbleContainer.appendChild(bubble);
+            });
+            
+            // Handle window resize - reposition bubbles
+            window.addEventListener('resize', () => {
+                viewportWidth = window.innerWidth;
+                viewportHeight = window.innerHeight;
+                
+                // Recalculate center point
                 const centerX = viewportWidth / 2;
                 const centerY = viewportHeight / 2;
-
-                // Calculate the ideal distance from center based on available space
-                // Adjusted distance calculation - slightly further out
-                const distance = Math.min(viewportWidth * 0.38, viewportHeight * 0.38, 350); // Use 38% or max 350px
-
-                // Create a bubble for each navigation item in perfect circle
-                navItems.forEach((item, index) => {
-                    // Create the visual bubble element
-                    const bubble = document.createElement('div');
-                    bubble.className = 'nav-bubble';
-
-                    // Calculate exact position in perfect circle around the center
-                    // Offset angle slightly to avoid top/bottom alignment if even number
-                    const angleOffset = navItems.length % 2 === 0 ? Math.PI / navItems.length : 0;
-                    const angle = (Math.PI * 2 / navItems.length) * index - (Math.PI / 2) + angleOffset; // Start from top, adjust if even
-
+                
+                // Recalculate bubble size and distance
+                const bubbleSize = Math.min(viewportWidth, viewportHeight) * 0.2;
+                const distance = Math.min(viewportWidth, viewportHeight) * 0.42;
+                
+                // Reposition all bubbles
+                const bubbles = document.querySelectorAll('.nav-bubble');
+                bubbles.forEach((bubble, index) => {
+                    const angle = (Math.PI * 2 / bubbles.length) * index;
                     const x = centerX + Math.cos(angle) * distance;
                     const y = centerY + Math.sin(angle) * distance;
-
-                    // Set bubble content (icon and text)
-                    bubble.innerHTML = `
-                        <i class="fas ${item.dataset.icon}"></i>
-                        <span>${item.textContent}</span>
-                    `;
-
-                    // Create and add hover description
-                    const description = document.createElement('div');
-                    // Determine if bubble is on left or right side of circle
-                    const isLeftSide = x < centerX;
-                    description.className = `bubble-description ${isLeftSide ? 'left' : 'right'}`;
-
-                    // Set description content based on feature
-                    const featureName = item.textContent; // Get the actual text content
-                    const title = document.createElement('h4');
-                    title.textContent = featureName; // Use the actual name for the title
-                    description.appendChild(title);
-
-                    const desc = document.createElement('p');
-
-                    // --- CORRECTED SWITCH STATEMENT ---
-                    // Match against the lowercased actual text content from the HTML
-                    switch(featureName.trim().toLowerCase()) {
-                        case 'game plan':
-                            desc.textContent = 'Organize your study schedule, set deadlines, and track progress. Our intelligent planner adapts to your learning style.';
-                            break;
-                        case 'the chase':
-                            desc.textContent = 'Find the perfect career opportunities tailored to your skills and experience with advanced filtering and personalized recommendations.';
-                            break;
-                        case 'all rounder':
-                            desc.textContent = 'Get instant answers from your textbooks with our AI-powered assistant. Upload PDFs, ask questions, and generate study notes.';
-                            break;
-                        case 'strategic time out':
-                            desc.textContent = 'Let our advanced AI create personalized study plans optimized for your specific learning goals and timeline.';
-                            break;
-                        case 'coach':
-                            desc.textContent = 'Practice with real interview questions, get feedback on your answers, and prepare for technical interviews.';
-                            break;
-                        case 'training':
-                            desc.textContent = 'Master data structures and algorithms with hundreds of curated practice problems across different difficulty levels.';
-                            break;
-                        default:
-                            // Fallback for any items not explicitly listed or potential errors
-                            desc.textContent = `Access the ${featureName} feature to enhance your learning experience with EnginSync.`;
-                    }
-                    // --- END OF CORRECTION ---
-
-                    description.appendChild(desc);
-                    bubble.appendChild(description);
-
-                    // Position the bubble (static, no movement)
+                    
                     bubble.style.left = `${x - bubbleSize/2}px`;
                     bubble.style.top = `${y - bubbleSize/2}px`;
                     bubble.style.width = `${bubbleSize}px`;
                     bubble.style.height = `${bubbleSize}px`;
-
-                    // Set unique animation delay
-                    bubble.style.setProperty('--delay', index + 1);
-
-                    // Add click handler for navigation
-                    bubble.addEventListener('click', () => {
-                        // Create pop effect
-                        bubble.style.animation = 'popEffect 0.4s ease-out forwards';
-
-                        // Navigate to the target page after animation
-                        setTimeout(() => {
-                            window.location.href = item.dataset.href;
-                        }, 300); // Adjust timing if needed
-                    });
-
-                    bubbleContainer.appendChild(bubble);
                 });
-            }
-
-            // Initial generation
-            generateBubbles();
-
-            // Handle window resize - reposition bubbles
-             let resizeTimeout;
-             window.addEventListener('resize', () => {
-                 clearTimeout(resizeTimeout);
-                 resizeTimeout = setTimeout(generateBubbles, 150); // Debounce resize event
-             });
-        }); // End DOMContentLoaded for Bubble Nav & Features
-
+            });
+        });
+        
         // --- Theme Toggle Functionality ---
         const body = document.body;
         const themeToggleButton = document.getElementById('theme-toggle');
-        const themeChangeEvent = new Event('themeChanged'); // Custom event for charts
 
         function setTheme(theme) {
-             localStorage.setItem('theme', theme); // Store preference
+            localStorage.setItem('theme', theme); // Store preference
              if (theme === 'dark') {
                  body.classList.add('dark-mode');
                  body.classList.remove('light-mode');
-                 if(themeToggleButton) themeToggleButton.innerHTML = '☀️'; // Sun emoji for dark mode
+                 if(themeToggleButton) themeToggleButton.innerHTML = '<span style="font-size: 1.5em;">☀️</span>'; // Sun emoji for dark mode (bigger)
                  if(themeToggleButton) themeToggleButton.setAttribute('title', 'Switch to light mode');
              } else {
                  body.classList.add('light-mode');
                  body.classList.remove('dark-mode');
-                 if(themeToggleButton) themeToggleButton.innerHTML = '🌙'; // Moon emoji for light mode
+                 if(themeToggleButton) themeToggleButton.innerHTML = '<span style="font-size: 1.5em;">🌙</span>'; // Moon emoji for light mode (bigger)
                  if(themeToggleButton) themeToggleButton.setAttribute('title', 'Switch to dark mode');
              }
-             // Dispatch the custom event for charts
-             document.dispatchEvent(themeChangeEvent);
-        }
+         }
 
-        // Check for saved theme preference or use device preference
-        const savedTheme = localStorage.getItem('theme');
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        let initialTheme = 'light'; // Default to light
-        if (savedTheme) {
-            initialTheme = savedTheme;
-        } else if (prefersDark) {
-            initialTheme = 'dark';
-        }
-
-        // Apply initial theme class *before* DOMContentLoaded listener completes if possible
-        // This reduces the flash of the unstyled theme
-        if (initialTheme === 'dark') {
+         // Check for saved theme preference or use device preference
+         const savedTheme = localStorage.getItem('theme');
+         const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+         let initialTheme = 'light'; // Default to light
+         if (savedTheme) {
+             initialTheme = savedTheme;
+         } else if (prefersDark) {
+             initialTheme = 'dark';
+         }
+         // Apply initial theme class *before* DOMContentLoaded listener
+         if (initialTheme === 'dark') {
              body.classList.add('dark-mode');
              body.classList.remove('light-mode');
-        } else {
+         } else {
              body.classList.add('light-mode');
              body.classList.remove('dark-mode');
-        }
+         }
+         // Set initial emoji
+         if(themeToggleButton) {
+             themeToggleButton.innerHTML = initialTheme === 'dark' ? '☀️' : '🌙';
+             themeToggleButton.setAttribute('title', initialTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+         }
 
-        // Set initial emoji and title *after* DOM is ready
-        document.addEventListener('DOMContentLoaded', () => {
-             if(themeToggleButton) {
-                 themeToggleButton.innerHTML = initialTheme === 'dark' ? '☀️' : '🌙';
-                 themeToggleButton.setAttribute('title', initialTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
-             }
-        });
+         // Add click listener for the toggle button
+         if (themeToggleButton) {
+             themeToggleButton.addEventListener('click', () => {
+                 const newTheme = body.classList.contains('dark-mode') ? 'light' : 'dark';
+                 setTheme(newTheme);
+             });
+         }
+         
+         // Make welcome message disappear after a few seconds
+         document.addEventListener('DOMContentLoaded', function() {
+            const welcomeText = document.querySelector('.welcome-text');
+            if (welcomeText) {
+                setTimeout(function() {
+                    welcomeText.style.transition = 'opacity 1s ease-out';
+                    welcomeText.style.opacity = '0';
+                    setTimeout(function() {
+                        welcomeText.style.display = 'none';
+                    }, 1000);
+                }, 3000); // Display for 3 seconds before fading out
+            }
+         });
 
-
-        // Add click listener for the toggle button
-        if (themeToggleButton) {
-            themeToggleButton.addEventListener('click', () => {
-                const newTheme = body.classList.contains('dark-mode') ? 'light' : 'dark';
-                setTheme(newTheme);
-            });
-        }
-
-        // Welcome Message JS is removed
-
-        // Update header title based on active nav item (Server-side preferred)
-        // This client-side version might not always be accurate if routing changes
+         // Update header title based on active nav item (server-side preferred)
         document.addEventListener('DOMContentLoaded', function() {
-            const headerTitle = document.querySelector('.dashboard-title');
-            // Title is static "Dashboard" for this page
+            const activeNavItem = document.querySelector('.sidebar-nav .nav-item.active span');
+            const headerTitle = document.querySelector('.header-title');
+            if (activeNavItem && headerTitle) {
+                headerTitle.textContent = activeNavItem.textContent;
+            } else if (headerTitle) {
+                // Fallback if no active item found (e.g., direct URL access)
+                const path = window.location.pathname.split('/').pop().replace('.html','');
+                if (path === 'dashboard' || path === '') headerTitle.textContent = 'Dashboard';
+                else if (path) headerTitle.textContent = path.charAt(0).toUpperCase() + path.slice(1); // Capitalize path name
+                else headerTitle.textContent = 'EnginSync'; // Default
+            }
         });
 
     </script>
-
+    
+    <!-- Chart Initialization Code -->
     <script>
         // Chart Instances (global scope for re-rendering)
         let skillChartInstance = null;
@@ -1023,7 +1033,7 @@
             return {
                 primaryText: getColor('--text-primary', '#111'),
                 secondaryText: getColor('--text-secondary', '#555'),
-                gridColor: getColor('--chart-grid-color', 'rgba(0,0,0,0.08)'), // Use defined variable
+                gridColor: getColor('--chart-grid-color', 'rgba(0,0,0,0.08)'),
                 accentRed: getColor('--accent-red', '#D81B27'),
                 accentGold: getColor('--accent-gold', '#FFC72C'),
                 successColor: getColor('--success-color', '#28a745'),
@@ -1035,116 +1045,98 @@
         function initializeCharts() {
             const themeColors = getChartThemeColors();
 
-            // Destroy existing charts if they exist
             if (skillChartInstance) skillChartInstance.destroy();
             if (progressChartInstance) progressChartInstance.destroy();
             if (completionChartInstance) completionChartInstance.destroy();
             skillChartInstance = null; progressChartInstance = null; completionChartInstance = null;
 
-            // --- Dummy Data (Replace with actual Jinja variables if available) ---
-            const skills = [
-                { name: "Algorithms", proficiency_level: 75 },
-                { name: "Data Structures", proficiency_level: 80 },
-                { name: "System Design", proficiency_level: 60 },
-                { name: "Problem Solving", proficiency_level: 85 },
-                { name: "Python", proficiency_level: 90 },
-                { name: "SQL", proficiency_level: 70 }
-            ];
-            const weekly_progress = [
-                { week: "W1", count: 5 }, { week: "W2", count: 8 }, { week: "W3", count: 7 },
-                { week: "W4", count: 10 }, { week: "W5", count: 12 }, { week: "W6", count: 9 }
-            ];
-            const assignments = [
-                 { description: "Assign 1", score: 92 }, { description: "Assign 2", score: 78 },
-                 { description: "Assign 3", score: 88 }, { description: "Assign 4", score: null }, // Example null score
-                 { description: "Assign 5", score: 95 }, { description: "Assign 6", score: 81 }
-            ];
-            // --- End Dummy Data ---
-
-            // --- Real Skill Data using the dummy data structure ---
+            // --- Real Skill Data from Database ---
             const skillMasteryData = {
-                 labels: skills.map(skill => skill.name),
-                 datasets: [{
-                     label: 'Current Mastery',
-                     data: skills.map(skill => skill.proficiency_level),
-                     backgroundColor: themeColors.accentRed + '4D', // RED transparent (~30%)
-                     borderColor: themeColors.accentRed, // RED solid
-                     borderWidth: 2,
-                     pointBackgroundColor: themeColors.accentRed,
-                     pointBorderColor: themeColors.cardBg,
-                     pointHoverBackgroundColor: themeColors.cardBg,
-                     pointHoverBorderColor: themeColors.accentRed
-                 }]
+                labels: [{% for skill in skills %}"{{ skill.name }}"{% if not loop.last %}, {% endif %}{% endfor %}],
+                datasets: [{
+                    label: 'Current Mastery',
+                    data: [{% for skill in skills %}{{ skill.proficiency_level }}{% if not loop.last %}, {% endif %}{% endfor %}],
+                    backgroundColor: themeColors.accentRed + '4D', // RED transparent (~30%)
+                    borderColor: themeColors.accentRed, // RED solid
+                    borderWidth: 2,
+                    pointBackgroundColor: themeColors.accentRed,
+                    pointBorderColor: themeColors.cardBg,
+                    pointHoverBackgroundColor: themeColors.cardBg,
+                    pointHoverBorderColor: themeColors.accentRed
+                }]
             };
 
             // --- Weekly Progress Data ---
             const progressOverTimeData = {
-                 labels: weekly_progress.map(week => week.week),
-                 datasets: [{
-                     label: 'Activities Completed',
-                     data: weekly_progress.map(week => week.count),
-                     fill: false,
-                     borderColor: themeColors.accentRed, // Red line
-                     tension: 0.1,
-                     pointBackgroundColor: themeColors.accentRed,
-                     pointBorderColor: themeColors.cardBg,
-                     pointHoverBackgroundColor: themeColors.cardBg,
-                     pointHoverBorderColor: themeColors.accentRed,
-                 }]
+                labels: [{% for week in weekly_progress %}"{{ week.week }}"{% if not loop.last %}, {% endif %}{% endfor %}],
+                datasets: [{
+                    label: 'Activities Completed',
+                    data: [{% for week in weekly_progress %}{{ week.count }}{% if not loop.last %}, {% endif %}{% endfor %}],
+                    fill: false,
+                    borderColor: themeColors.accentRed, // Red line
+                    tension: 0.1,
+                    pointBackgroundColor: themeColors.accentRed,
+                    pointBorderColor: themeColors.cardBg,
+                    pointHoverBackgroundColor: themeColors.cardBg,
+                    pointHoverBorderColor: themeColors.accentRed,
+                }]
             };
 
             // --- Assignment Completion Data ---
             const completionRateData = {
-                 labels: assignments.map(a => a.description.substring(0, 10) + (a.description.length > 10 ? '...' : '')), // Shorten labels
-                 datasets: [{
-                     label: 'Score (%)',
-                     data: assignments.map(a => a.score), // Handles null scores correctly
-                     backgroundColor: assignments.map(a => a.score && a.score > 85 ? themeColors.successColor + 'B3' : themeColors.accentRed + 'B3'), // Transparent colors
-                     borderColor: assignments.map(a => a.score && a.score > 85 ? themeColors.successColor : themeColors.accentRed), // Solid colors
-                     borderWidth: 1,
-                     borderRadius: 4,
-                 }]
-             };
+                labels: [{% for assignment in assignments %}"{{ assignment.description[:10] }}..."{% if not loop.last %}, {% endif %}{% endfor %}],
+                datasets: [{
+                    label: 'Score (%)',
+                    data: [{% for assignment in assignments %}{{ assignment.score if assignment.score else "null" }}{% if not loop.last %}, {% endif %}{% endfor %}],
+                    backgroundColor: [
+                        {% for assignment in assignments %}
+                        {% if assignment.score and assignment.score > 85 %}themeColors.successColor + 'B3'{% else %}themeColors.accentRed + 'B3'{% endif %}{% if not loop.last %}, {% endif %}
+                        {% endfor %}
+                    ],
+                    borderColor: [
+                        {% for assignment in assignments %}
+                        {% if assignment.score and assignment.score > 85 %}themeColors.successColor{% else %}themeColors.accentRed{% endif %}{% if not loop.last %}, {% endif %}
+                        {% endfor %}
+                    ],
+                    borderWidth: 1, borderRadius: 4,
+                }]
+            };
 
-             // --- Chart Configurations ---
-             // Note: These assume you have canvas elements with these IDs in your actual content section
-             // Since they are not in the provided HTML structure, these will only run if the elements exist.
-             const ctxSkill = document.getElementById('skillMasteryChart');
-             if (ctxSkill) {
-                  skillChartInstance = new Chart(ctxSkill, {
-                      type: 'radar', data: skillMasteryData,
-                      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { backgroundColor: themeColors.cardBg, titleColor: themeColors.primaryText, bodyColor: themeColors.secondaryText } },
-                           scales: { r: { angleLines: { color: themeColors.gridColor }, grid: { color: themeColors.gridColor }, pointLabels: { color: themeColors.secondaryText, font: { size: 11 } }, suggestedMin: 0, suggestedMax: 100, ticks: { color: themeColors.secondaryText, backdropColor: 'transparent' } } } } });
+            // --- Chart Configurations ---
+            const ctxSkill = document.getElementById('skillMasteryChart');
+            if (ctxSkill) {
+                 skillChartInstance = new Chart(ctxSkill, {
+                    type: 'radar', data: skillMasteryData,
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+                        scales: { r: { angleLines: { color: themeColors.gridColor }, grid: { color: themeColors.gridColor }, pointLabels: { color: themeColors.secondaryText, font: { size: 11 } }, suggestedMin: 0, suggestedMax: 100, ticks: { color: themeColors.secondaryText, backdropColor: 'transparent' } } } } });
+            }
+
+            const ctxProgress = document.getElementById('progressOverTimeChart');
+             if (ctxProgress) {
+                  progressChartInstance = new Chart(ctxProgress, {
+                    type: 'line', data: progressOverTimeData,
+                     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+                        scales: { y: { beginAtZero: true, suggestedMax: 20, grid: { color: themeColors.gridColor }, ticks: { color: themeColors.secondaryText } }, x: { grid: { display: false }, ticks: { color: themeColors.secondaryText } } } } });
              }
 
-             const ctxProgress = document.getElementById('progressOverTimeChart');
-              if (ctxProgress) {
-                   progressChartInstance = new Chart(ctxProgress, {
-                       type: 'line', data: progressOverTimeData,
-                       options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { backgroundColor: themeColors.cardBg, titleColor: themeColors.primaryText, bodyColor: themeColors.secondaryText } },
-                           scales: { y: { beginAtZero: true, suggestedMax: Math.max(...progressOverTimeData.datasets[0].data, 15) + 5, grid: { color: themeColors.gridColor }, ticks: { color: themeColors.secondaryText } }, x: { grid: { display: false }, ticks: { color: themeColors.secondaryText } } } } });
-              }
-
-              const ctxCompletion = document.getElementById('completionRateChart');
-              if (ctxCompletion) {
-                  completionChartInstance = new Chart(ctxCompletion, {
-                      type: 'bar', data: completionRateData,
-                      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { backgroundColor: themeColors.cardBg, titleColor: themeColors.primaryText, bodyColor: themeColors.secondaryText, callbacks: { label: function(context) { let label = context.dataset.label || ''; if (label) { label += ': '; } if (context.parsed.y !== null) { label += context.parsed.y + '%'; } else { label += 'N/A'; } return label; } } } },
-                          scales: { y: { beginAtZero: true, suggestedMax: 100, grid: { color: themeColors.gridColor }, ticks: { color: themeColors.secondaryText, callback: function(value) { return value + '%' } } }, x: { grid: { display: false }, ticks: { color: themeColors.secondaryText } } } } });
-             }
+             const ctxCompletion = document.getElementById('completionRateChart');
+             if (ctxCompletion) {
+                 completionChartInstance = new Chart(ctxCompletion, {
+                    type: 'bar', data: completionRateData,
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+                        scales: { y: { beginAtZero: true, suggestedMax: 100, grid: { color: themeColors.gridColor }, ticks: { color: themeColors.secondaryText, callback: function(value) { return value + '%' } } }, x: { grid: { display: false }, ticks: { color: themeColors.secondaryText } } } } });
+            }
         }
-
+        
         // Initialize charts when DOM is loaded
         document.addEventListener('DOMContentLoaded', () => {
-             initializeCharts(); // Initial chart draw
+            initializeCharts();
         });
-
-        // Re-initialize charts when theme is changed (listen for the custom event)
+        
+        // Re-initialize charts when theme is changed
         document.addEventListener('themeChanged', () => {
-             // Use a small timeout to allow CSS variables to potentially update
-             setTimeout(initializeCharts, 50);
+            setTimeout(initializeCharts, 50);
         });
     </script>
-
 </body>
 </html>

@@ -742,11 +742,8 @@
                             
                             {{ study_plan_text }}
                             
-                            <div style="margin-top: 20px; display: flex; gap: 10px;">
-                                <button id="download-pdf-btn" class="btn btn-secondary">
-                                    <i class="fas fa-file-pdf"></i> Download as PDF
-                                </button>
-                                <button id="download-txt-btn" class="btn btn-primary">
+                            <div style="margin-top: 20px;">
+                                <button id="download-txt-btn" class="btn btn-primary" style="width: 100%;">
                                     <i class="fas fa-file-alt"></i> Download as Text
                                 </button>
                             </div>
@@ -842,7 +839,7 @@
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <!-- PDF library removed as no longer needed -->
     <script>
         // --- Theme Toggling ---
         const body = document.body;
@@ -882,39 +879,6 @@
         
         // --- Download Functionality ---
         document.addEventListener('DOMContentLoaded', function() {
-            // PDF Download functionality
-            const pdfBtn = document.getElementById('download-pdf-btn');
-            if (pdfBtn) {
-                pdfBtn.addEventListener('click', function() {
-                    // Get the study plan container
-                    const studyPlanContainer = document.querySelector('.study-plan-container');
-                    if (!studyPlanContainer) return;
-                    
-                    // Show loading state
-                    pdfBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating PDF...';
-                    pdfBtn.disabled = true;
-                    
-                    // Configure pdf options
-                    const options = {
-                        margin: [10, 10, 10, 10],
-                        filename: 'study_plan.pdf',
-                        image: { type: 'jpeg', quality: 0.98 },
-                        html2canvas: { scale: 2, useCORS: true },
-                        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-                    };
-                    
-                    // Generate PDF with callback for completion
-                    html2pdf().from(studyPlanContainer).set(options).save()
-                        .then(() => {
-                            // Reset button state after PDF is generated
-                            setTimeout(() => {
-                                pdfBtn.innerHTML = '<i class="fas fa-file-pdf"></i> Download as PDF';
-                                pdfBtn.disabled = false;
-                            }, 1000);
-                        });
-                });
-            }
-            
             // Text Download functionality
             const textBtn = document.getElementById('download-txt-btn');
             if (textBtn) {

@@ -2,16 +2,13 @@ import sqlite3
 import os
 import json
 import functools
-import calendar
-import markdown
-import re
-import pandas as pd
-import numpy as np
-from markupsafe import Markup
 from flask import (
     Flask, render_template, request, redirect, url_for, session, flash, g,
     jsonify, send_file
 )
+from assessment_models import init_assessment_tables
+from assessment import assessment_bp
+from recommendations import recommendations_bp
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 import requests
@@ -42,6 +39,9 @@ app = Flask(__name__)
 # You can generate one using: python -c 'import os; print(os.urandom(24))'
 app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', b'_5#y2L"F4Q8z\n\xec]/')
 app.config['DATABASE'] = 'enginsync.db'
+app.config['PROBLEMS_PER_DAY'] = 5  # Number of daily practice problems
+app.config['STRIVERS_EXCEL_PATH'] = 'data/Strivers.xlsx'  # Path to Strivers Excel file
+app.config['COMPLETION_THRESHOLD'] = 0.75  # Threshold for advancing difficulty level
 
 # Configure Google Generative AI (Gemini)
 GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', 'AIzaSyBDJi9htw2_i1C6-1Z8wM9OGuGFJYkgpyo')
@@ -93,6 +93,12 @@ def get_db():
         )
         g.db.row_factory = sqlite3.Row # Return rows as dictionary-like objects
     return g.db
+
+# Initialize database tables for assessment and practice problems
+def init_db():
+    """Initialize database tables for all features."""
+    db = get_db()
+    init_assessment_tables(db)
 
 @app.teardown_appcontext
 def close_db(e=None):
@@ -646,156 +652,11 @@ def planner():
     """Placeholder for planner page."""
     return render_template('planner.html', back_url=url_for('dashboard'))
 
-def generate_study_plan(prompt):
-    """Generates a study plan using the Gemini API and formats it for better display."""
-    try:
-        model = genai.GenerativeModel('gemini-2.0-flash')
-        # More specific prompt to generate well-structured, table-based study plans
-        response = model.generate_content(f"""
-        Create a detailed, structured study plan for: '{prompt}'
-        
-        FORMAT REQUIREMENTS (CRITICAL):
-        1. Use HTML formatting to create a visually appealing, structured plan
-        2. Start with a brief introduction about the plan
-        3. Include a main table with these EXACT columns:
-           - Day/Date
-           - Topics
-           - Time Allocation
-           - Activities/Resources
-        4. Format the table with proper HTML <table>, <tr>, <th>, and <td> tags
-        5. For each day, include detailed daily activities with bullet points
-        6. Use <strong> tags for emphasis and organization
-        7. Add study tips and best practices section after the main schedule
-        8. Use proper headings with <h2>, <h3> tags for different sections
-        9. Make sure each day's content is comprehensive but concise
-        
-        EXAMPLE TABLE STRUCTURE (follow this format exactly):
-        <table>
-          <tr>
-            <th>Day/Date</th>
-            <th>Topics</th>
-            <th>Time Allocation</th>
-            <th>Activities/Resources</th>
-          </tr>
-          <tr>
-            <td>Day 1</td>
-            <td>Introduction to [Topic]</td>
-            <td>3-4 hours</td>
-            <td>
-              <ul>
-                <li>Watch introductory videos</li>
-                <li>Read chapter 1-2</li>
-                <li>Practice basic exercises</li>
-              </ul>
-            </td>
-          </tr>
-          <!-- More rows for other days -->
-        </table>
-        
-        YOUR RESPONSE MUST INCLUDE THIS HTML TABLE FORMAT FOR THE SCHEDULE.
-        """)
-        
-        # Get the raw text response
-        raw_text = response.text
-        
-        # First, clean up any raw HTML tags or text markers at the beginning
-        # Remove anything that looks like ```html or html or <html> at the start
-        raw_text = re.sub(r'^\s*(?:```(?:html)?|html|<html>)\s*', '', raw_text, flags=re.IGNORECASE)
-        # Remove trailing ``` if present at the end
-        raw_text = re.sub(r'\s*```\s*$', '', raw_text)
-        
-        # Clean up any markdown-style tables and convert to proper HTML if needed
-        # Replace markdown tables with HTML tables if they exist
-        table_pattern = r'\|(.+?)\|\n\|[-:\s|]+\|\n((\|.+?\|\n)+)'
-        
-        def table_replacer(match):
-            header = match.group(1).strip().split('|')
-            rows = match.group(2).strip().split('\n')
-            
-            html_table = '<table class="study-plan-table">\n<thead>\n<tr>'
-            for col in header:
-                html_table += f'<th>{col.strip()}</th>'
-            html_table += '</tr>\n</thead>\n<tbody>'
-            
-            for row in rows:
-                html_table += '\n<tr>'
-                cols = row.strip().strip('|').split('|')
-                for col in cols:
-                    html_table += f'<td>{col.strip()}</td>'
-                html_table += '</tr>'
-            
-            html_table += '\n</tbody></table>'
-            return html_table
-        
-        # Apply table conversion if markdown tables exist
-        formatted_text = re.sub(table_pattern, table_replacer, raw_text, flags=re.DOTALL)
-        
-        # Apply additional structure improvements
-        # Convert markdown headings to HTML if needed
-        formatted_text = re.sub(r'^##\s+(.+?)$', r'<h2>\1</h2>', formatted_text, flags=re.MULTILINE)
-        formatted_text = re.sub(r'^###\s+(.+?)$', r'<h3>\1</h3>', formatted_text, flags=re.MULTILINE)
-        
-        # Convert markdown lists to HTML if needed
-        formatted_text = re.sub(r'^\*\s+(.+?)$', r'<li>\1</li>', formatted_text, flags=re.MULTILINE)
-        formatted_text = re.sub(r'(<li>.+?</li>\n)+', r'<ul>\n\g<0></ul>', formatted_text, flags=re.DOTALL)
-        
-        # Convert markdown emphasis to HTML if needed
-        formatted_text = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', formatted_text)
-        formatted_text = re.sub(r'\*(.+?)\*', r'<em>\1</em>', formatted_text)
-        
-        # Ensure the content is properly formatted with HTML
-        # If the content doesn't already have HTML structure, add it
-        if '<html>' not in formatted_text.lower():
-            # Check if we have any HTML tags at all
-            if '<' not in formatted_text or '>' not in formatted_text:
-                # If no HTML, treat as plain text and add basic formatting
-                replacement1 = formatted_text.replace("\n\n", "</p><p>")
-                replacement2 = replacement1.replace("\n", "<br>")
-                formatted_text = f'<div class="study-plan-container"><p>{replacement2}</p></div>'
-        
-        # Ensure we have proper HTML structure for the content
-        html_content = formatted_text
-        
-        # Add specific styling for different sections
-        html_content = re.sub(r'<h2>(.+?Tips.+?)</h2>', r'<h2 class="study-plan-tips-header">\1</h2>', html_content, flags=re.IGNORECASE)
-        html_content = re.sub(r'<h2>(.+?Notes.+?)</h2>', r'<h2 class="study-plan-notes-header">\1</h2>', html_content, flags=re.IGNORECASE)
-        
-        # Add wrapper div for better styling control if not already present
-        if not html_content.startswith('<div class="study-plan-container">'):  
-            html_content = f'<div class="study-plan-container">{html_content}</div>'
-        
-        # Final cleanup to remove any stray text or markers that might be at the end
-        # This handles cases where the AI appends things like "I hope this helps!" or other commentary
-        html_content = re.sub(r'</div>\s*[\w\s,.!?:;()-]+$', '</div>', html_content)
-            
-        return Markup(html_content)  # Mark as safe HTML to prevent escaping
-    except Exception as e:
-        # Create a fallback HTML structure when an error occurs
-        error_html = f'''
-        <div class="study-plan-container">
-            <div class="study-plan-error">
-                <h2>Error Generating Study Plan</h2>
-                <p>We encountered an error while generating your study plan: {e}</p>
-                <p>Please try again with a more specific request.</p>
-            </div>
-        </div>
-        '''
-        return Markup(error_html)
-
-@app.route('/ai_planner', methods=['GET', 'POST'])
+@app.route('/ai_planner')
 @login_required
 def ai_planner():
-    """AI-powered study planner page."""
-    study_plan_text = None
-    
-    if request.method == 'POST':
-        study_prompt = request.form.get('study_prompt')
-        if study_prompt:
-            study_plan_text = generate_study_plan(study_prompt)
-    
-    return render_template('ai_planner.html', 
-                          back_url=url_for('dashboard'),
-                          study_plan_text=study_plan_text)
+    """AI-powered personalized planner page."""
+    return render_template('ai_planner.html', back_url=url_for('dashboard'))
 
 @app.route('/interview_prep')
 @login_required
@@ -1067,13 +928,9 @@ def jobsearch():
     error = None
     user_id = g.user['user_id']
     
-    # Initialize variables to store form input values
-    search_skills = ''
-    search_location = ''
-    
     if request.method == 'POST':
-        search_skills = request.form.get('skills', '')
-        search_location = request.form.get('location', 'Karnataka')
+        skills = request.form.get('skills', '')
+        location = request.form.get('location', 'Karnataka')
         num_results = int(request.form.get('num_results', 5))
         
         # Adzuna API endpoint for India
@@ -1083,48 +940,18 @@ def jobsearch():
         params = {
             "app_id": "96e12eac",
             "app_key": "7a545dc457029cd2527a9f21a366010e",
-            "what": search_skills,
-            "where": search_location,
+            "what": skills,
+            "where": location,
             "results_per_page": num_results,
             "content-type": "application/json",
         }
         
         try:
-            # Debug API call parameters
-            print(f"Making API call with params: {params}")
-            
             response = requests.get(url, params=params)
             
             if response.status_code == 200:
                 results = response.json()
-                print(f"API response received: {results.keys()}")
-                
                 jobs = results.get("results", [])
-                print(f"Found {len(jobs)} jobs")
-                
-                # If we don't have results, provide sample job data for testing
-                if not jobs:
-                    print("No results found, using sample data")
-                    jobs = [
-                        {
-                            'title': 'Software Developer',
-                            'company': {'display_name': 'TechCorp India'},
-                            'location': {'display_name': 'Bangalore, Karnataka'},
-                            'redirect_url': 'https://example.com/job1'
-                        },
-                        {
-                            'title': 'Data Analyst',
-                            'company': {'display_name': 'Analytics Partners'},
-                            'location': {'display_name': 'Hyderabad, Telangana'},
-                            'redirect_url': 'https://example.com/job2'
-                        },
-                        {
-                            'title': 'Frontend Engineer',
-                            'company': {'display_name': 'WebSolutions Inc.'},
-                            'location': {'display_name': 'Pune, Maharashtra'},
-                            'redirect_url': 'https://example.com/job3'
-                        }
-                    ]
                 
                 # Add icon based on job title for UI display
                 for job in jobs:
@@ -1141,12 +968,7 @@ def jobsearch():
         except Exception as e:
             error = f"An error occurred: {str(e)}"
     
-    return render_template('jobsearch.html', 
-                           jobs=jobs, 
-                           error=error, 
-                           search_skills=search_skills,
-                           search_location=search_location,
-                           back_url=url_for('dashboard'))
+    return render_template('jobsearch.html', jobs=jobs, error=error, back_url=url_for('dashboard'))
 
 @app.route('/settings')
 @login_required
@@ -1519,105 +1341,16 @@ def update_profile():
             
     return redirect(url_for('settings'))
 
-# --- DSA Practice Routes ---
-@app.route('/practice')
+# Register blueprints
+app.register_blueprint(assessment_bp)
+app.register_blueprint(recommendations_bp)
+
+# Add a route to the practice page from dashboard
+@app.route('/practice', methods=['GET'])
 @login_required
 def practice():
-    """DSA practice page with all problems organized by category."""
-    # Load the Excel file with problem set data
-    xlsx_path = 'data/Strivers.xlsx'
-    try:
-        df = pd.read_excel(xlsx_path)
-    except Exception as e:
-        flash(f"Error loading problem set data: {str(e)}", "error")
-        return redirect(url_for('dashboard'))
-    
-    # For displaying on sidebar, for user context - still show proficiency levels
-    proficiency_levels = {
-        "Arrays": "Beginner",
-        "Strings": "Intermediate",
-        "Linked Lists": "Beginner",
-        "Sorting": "Intermediate",
-        "Graphs": "Advanced",
-        "Trees": "Beginner",
-        "Dynamic Programming": "Advanced"
-    }
-    
-    # Map difficulty ratings from the Excel file to easy/medium/hard
-    def map_difficulty(rating):
-        if pd.isna(rating) or rating <= 1.5:
-            return "easy", "Easy"
-        elif rating <= 3.5:
-            return "medium", "Medium"
-        else:
-            return "hard", "Hard"
-    
-    # Process all problems from the Excel file
-    all_problems = []
-    problems_by_category = {}
-    
-    # Get unique categories and initialize counts
-    categories = df['Category'].unique().tolist()  # Convert NumPy array to Python list
-    topic_counts = {category: 0 for category in categories}
-    
-    # Process and organize all problems by category
-    for category in categories:
-        category_problems = []
-        category_df = df[df['Category'] == category]
-        topic_counts[category] = len(category_df)
-        
-        # Sort by difficulty within each category
-        category_df = category_df.sort_values(by='Level of Difficulty')
-        
-        # Process each problem
-        for _, row in category_df.iterrows():
-            difficulty_class, difficulty_label = map_difficulty(row['Level of Difficulty'])
-            problem = {
-                'name': row['Name'],
-                'problem_link': row['Link to problem'],
-                'solution_link': row['Link to solution'],
-                'category': category,
-                'difficulty_class': difficulty_class,
-                'difficulty_label': difficulty_label,
-                'difficulty_value': row['Level of Difficulty']
-            }
-            all_problems.append(problem)
-            category_problems.append(problem)
-        
-        # Store problems organized by category
-        problems_by_category[category] = category_problems
-    
-    # Get user completion data (in a real app, this would come from database)
-    # For demo purposes, we'll just use an empty dictionary
-    completed_problems = {}
-    total_completed = 0
-    streak = 3  # Example streak value
-    
-    return render_template('practice.html', 
-                          all_problems=all_problems,
-                          problems_by_category=problems_by_category,
-                          categories=categories,
-                          total_problems=len(all_problems),
-                          topic_counts=topic_counts,
-                          proficiency_levels=proficiency_levels,
-                          total_completed=total_completed,
-                          streak=streak)
-
-@app.route('/update_problem_status', methods=['POST'])
-@login_required
-def update_problem_status():
-    """Update the completion status of a practice problem."""
-    data = request.get_json()
-    if not data or 'problem_id' not in data or 'completed' not in data:
-        return jsonify({'success': False, 'error': 'Invalid data'}), 400
-    
-    problem_id = data['problem_id']
-    completed = data['completed']
-    
-    # In a real app, we would update the database
-    # For demo purposes, we'll just return success
-    
-    return jsonify({'success': True})
+    """Redirect to placement page."""
+    return redirect(url_for('recommendations.placement_page'))
 
 if __name__ == '__main__':
     # Ensure the database exists (run your schema script if needed)
@@ -1625,4 +1358,12 @@ if __name__ == '__main__':
         print(f"Database file '{app.config['DATABASE']}' not found.")
         print("Please run the database creation script first.")
         exit()
+    
+    # Initialize database tables
+    with app.app_context():
+        init_db()
+        # Also initialize sample assessment questions
+        from assessment import populate_sample_questions
+        populate_sample_questions()
+    
     app.run(debug=True) # debug=True enables auto-reloading and error pages

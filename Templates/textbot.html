@@ -222,7 +222,12 @@
         }
 
         /* Video Finder */
-        .prompt-suggestions { margin: 10px 0 15px 0; font-size: 0.9rem; color: var(--text-secondary); }
+        .prompt-suggestions { 
+            margin: 10px 0 15px 0; 
+            font-size: 0.9rem; 
+            color: var(--text-primary); 
+            font-weight: 500;
+        }
         .suggestion-btn { 
           display: inline-block; 
           margin-right: 8px; 
@@ -234,9 +239,25 @@
           font-size: 0.85rem;
           cursor: pointer;
           transition: all 0.3s ease;
+          color: var(--text-primary);
+          font-weight: 500;
+        }
+        
+        body.dark-mode .suggestion-btn {
+          background-color: rgba(255, 199, 44, 0.15);
+          border-color: var(--accent-gold);
+          color: var(--accent-gold);
         }
         .suggestion-btn:hover { 
           background: var(--accent-gold); 
+          color: var(--accent-black);
+          border-color: var(--accent-gold);
+          transform: translateY(-2px);
+          box-shadow: 0 3px 8px var(--shadow-color);
+        }
+        
+        body.dark-mode .suggestion-btn:hover {
+          background-color: var(--accent-gold);
           color: var(--accent-black);
           border-color: var(--accent-gold);
         }
@@ -414,9 +435,9 @@
                  <input type="text" id="concept-input" placeholder="e.g., Fourier Transform">
                  <div class="prompt-suggestions">
                      Suggestions:
-                     <button class="suggestion-btn">Photosynthesis</button>
-                     <button class="suggestion-btn">Newton's Laws</button>
-                     <button class="suggestion-btn">Black Holes</button>
+                     <button class="suggestion-btn">Computer Networks</button>
+                     <button class="suggestion-btn">DBMS</button>
+                     <button class="suggestion-btn">Object Oriented Programming</button>
                  </div>
                  <button id="find-videos-btn" class="btn btn-primary">Find Related Videos</button>
                  <div id="video-results" style="margin-top: 20px; display: none;">
@@ -429,7 +450,7 @@
             <div class="app-card" id="tts-card">
                 <h2><i class="fas fa-volume-up"></i> Listen to PDF</h2>
                 <p>Listen to the PDF document you uploaded. The text will be read aloud with highlighting.</p>
-                <div id="pdf-viewer" style="width: 100%; height: 300px; overflow-y: auto; border: 1px solid var(--border-color); margin-bottom: 15px; background-color: var(--card-bg); border-radius: 8px; display: none;">
+                <div id="pdf-viewer" style="width: 100%; height: 450px; overflow-y: auto; border: 1px solid var(--border-color); margin-bottom: 15px; background-color: var(--card-bg); border-radius: 8px; display: none;">
                 </div>
                 <div id="pdf-viewer-placeholder">
                     <span>Upload a PDF in the section above to view and listen to its content.</span>
@@ -937,5 +958,7 @@
          }
 
      </script>
+     <script src="https://cdn.botpress.cloud/webchat/v2.3/inject.js"></script>
+     <script src="https://files.bpcontent.cloud/2025/04/11/19/20250411192852-QG5OD9LK.js"></script>
 </body>
 </html>

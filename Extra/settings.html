@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - EnginSync</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* --- Theme Variables (RCB Theme) --- */
+        :root {
+            --bg-primary: #ffffff; --bg-secondary: #f5f5f5; --bg-accent: #111111;
+            --text-primary: #111111; --text-secondary: #555555;
+            --accent-red: #D81B27; --accent-gold: #FFC72C; --accent-black: #111111;
+            --shadow-color: rgba(0, 0, 0, 0.08); /* Softer shadow */
+            --shadow-color-glow: rgba(216, 27, 39, 0.1); /* Red glow */
+            --success-color: #28a745; --error-color: #dc3545;
+            --border-color: #e0e0e0; --header-height: 60px;
+            --card-bg: #ffffff; --input-bg: #f8f9fa; /* Match secondary bg */
+            --input-border: #cccccc; --switch-bg-off: #ccc; /* Light mode off color */
+            --transition-speed: 0.3s;
+            --theme-toggle-color-light: var(--accent-gold);
+            --theme-toggle-hover-light: var(--accent-red);
+        }
+        body.dark-mode {
+            --bg-primary: #1a1a1a;      /* Darker primary bg (cards/header) */
+            --bg-secondary: #111111;    /* Dark body bg */
+            --bg-accent: #000000;
+            --text-primary: #f0f0f0; --text-secondary: #cccccc;
+            --accent-red: #ff4d4d; /* Brighter Red */
+            --accent-gold: #FFD700; --accent-black: #111111;
+            --shadow-color: rgba(0, 0, 0, 0.3);
+            --shadow-color-glow: rgba(255, 77, 77, 0.2); /* Red glow */
+            --border-color: #444444; --card-bg: #1f1f1f; /* Slightly lighter card */
+            --input-bg: #2a2a2a; --input-border: #555555;
+            --switch-bg-off: #555; /* Dark mode off color */
+            --theme-toggle-color-dark: var(--accent-red);
+            --theme-toggle-hover-dark: var(--accent-gold);
+        }
+
+        /* --- Global Styles --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Poppins', sans-serif; line-height: 1.6; background-color: var(--bg-secondary); color: var(--text-primary); transition: background-color 0.3s ease, color 0.3s ease; overflow-x: hidden; min-height: 100vh; }
+        h1, h2, h3, h4, h5, h6 { font-weight: 600; line-height: 1.3; color: var(--text-primary); transition: color 0.3s ease; }
+        a { text-decoration: none; color: var(--accent-red); transition: color 0.3s ease; font-weight: 500; }
+         body.dark-mode a { color: var(--accent-gold);}
+         a:hover { color: var(--accent-gold); }
+         body.dark-mode a:hover { color: var(--accent-red);}
+        p { margin-bottom: 1em; color: var(--text-secondary); transition: color 0.3s ease; font-size: 0.95em; }
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 20px; border-radius: 25px; font-weight: 600; letter-spacing: 0.5px; transition: all 0.3s ease; cursor: pointer; border: none; box-shadow: 0 4px 10px var(--shadow-color); }
+        .btn i { font-size: 0.9em;}
+        .btn-primary { background-color: var(--accent-gold); color: var(--accent-black); }
+        .btn-primary:hover { background-color: #e6b325; transform: translateY(-2px); box-shadow: 0 6px 12px var(--shadow-color); }
+        .btn-secondary { background-color: var(--accent-red); color: white; }
+        .btn-secondary:hover { background-color: #c01822; transform: translateY(-2px); box-shadow: 0 6px 12px var(--shadow-color);}
+
+        /* --- Layout (No Sidebar) --- */
+        .app-container { display: block; }
+        .main-content { margin-left: 0; /* Full width */ }
+
+        /* --- Header --- */
+        .header {
+            height: var(--header-height); background-color: var(--bg-primary);
+            box-shadow: 0 2px 8px var(--shadow-color);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 30px; position: sticky; top: 0; z-index: 50;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .header-left { display: flex; align-items: center; gap: 15px; }
+        .btn-back {
+            background: none; border: 1px solid var(--border-color);
+            color: var(--text-secondary); width: 36px; height: 36px; padding: 0;
+            border-radius: 50%; font-size: 1rem; line-height: 1;
+        }
+        .btn-back:hover { background-color: var(--bg-secondary); border-color: var(--text-secondary); color: var(--text-primary); }
+         body.dark-mode .btn-back { border-color: var(--border-color); color: var(--text-secondary); }
+         body.dark-mode .btn-back:hover { background-color: var(--bg-secondary); border-color: var(--text-primary); color: var(--text-primary); }
+
+        .header-title { font-size: 1.4em; font-weight: 600; color: var(--text-primary); }
+        .header-actions { display: flex; align-items: center; }
+        .header-actions > * { margin-left: 20px; }
+
+        /* Theme Toggle Button (Emoji Only) */
+         .theme-toggle {
+             background: none; border: none; color: var(--theme-toggle-color-light);
+             width: auto; height: auto; padding: 0; border-radius: 0;
+             cursor: pointer; transition: color 0.3s ease; display: flex;
+             align-items: center; justify-content: center; font-size: 1.5em;
+             margin-left: 15px;
+         }
+         .theme-toggle:hover { background: none; color: var(--theme-toggle-hover-light); }
+         body.dark-mode .theme-toggle { color: var(--theme-toggle-color-dark); }
+         body.dark-mode .theme-toggle:hover { background: none; color: var(--theme-toggle-hover-dark); }
+
+        /* --- Content Area --- */
+        .content { padding: 30px; max-width: 1200px; margin: 20px auto; }
+        .settings-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 30px; }
+
+        /* --- Settings Specific Styles --- */
+        .settings-card {
+            background-color: var(--card-bg); border-radius: 12px;
+            box-shadow: 0 4px 12px var(--shadow-color); margin-bottom: 0;
+            padding: 25px; border: 1px solid var(--border-color);
+            transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+            display: flex; flex-direction: column;
+        }
+        .settings-card h3 {
+            color: var(--accent-red); margin-bottom: 20px; padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-color); font-size: 1.2em;
+            padding-left: 10px; border-left: 4px solid var(--accent-red);
+            transition: color 0.3s ease, border-color 0.3s ease;
+        }
+
+        .settings-card form { flex-grow: 1; display: flex; flex-direction: column; }
+        .form-group { margin-bottom: 20px; }
+        .form-group:last-of-type { margin-bottom: 0; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: 500; color: var(--text-primary); font-size: 0.9em; }
+        .form-group input[type="text"],
+        .form-group input[type="email"],
+        .form-group input[type="password"],
+        .form-group select {
+            width: 100%; padding: 10px 12px; border: 1px solid var(--input-border); border-radius: 6px;
+            background-color: var(--input-bg); color: var(--text-primary); font-size: 0.95em;
+            transition: all 0.3s ease;
+        }
+        .form-group input:focus,
+        .form-group select:focus { outline: none; border-color: var(--accent-red); /* Focus color RED now */ box-shadow: 0 0 0 3px var(--shadow-color-glow); }
+
+         .form-actions { text-align: right; margin-top: auto; padding-top: 20px; }
+        .input-hint { font-size: 0.8em; color: var(--text-secondary); margin-top: 6px; }
+
+        /* --- Toggle Switch (Simple Toggle Style - Red Theme) --- */
+        .toggle-switch { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+        .toggle-switch label { margin-bottom: 0; flex: 1; margin-right: 15px; font-weight: 500; font-size: 0.9em; color: var(--text-primary); transition: color 0.3s ease; }
+        .switch { position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; }
+        .switch input { opacity: 0; width: 0; height: 0; position: absolute; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--switch-bg-off); transition: .4s; border-radius: 24px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+
+        /* --- UPDATED COLORS FOR RED THEME --- */
+        input:checked + .slider { background-color: var(--accent-red); } /* ON color = RED */
+        input:focus + .slider { box-shadow: 0 0 1px var(--accent-red); } /* Focus color = RED */
+        input:checked + .slider:before { transform: translateX(20px); }
+        input:disabled + .slider { cursor: not-allowed; opacity: 0.6; }
+        input:disabled:checked + .slider { background-color: var(--accent-red); opacity: 0.5; } /* Disabled ON color = RED */
+        input:disabled + .slider:before { background-color: #f0f0f0; }
+
+        /* Responsive */
+        @media (max-width: 992px) { .content { max-width: 95%; } .settings-grid { grid-template-columns: 1fr; } }
+        @media (max-width: 768px) { .header { padding: 0 15px; } .header-title { font-size: 1.2em; } .content { padding: 20px; } .settings-card { padding: 20px; } .form-actions { text-align: center; } .form-actions .btn { width: 100%; margin-bottom: 10px; } .form-actions .btn:last-child { margin-bottom: 0; } }
+        @media (max-width: 576px) { h3 { font-size: 1.1em;} .header-actions > * { margin-left: 10px; } .settings-card h3 { font-size: 1.1em; margin-bottom: 15px; } .form-group { margin-bottom: 15px; } .toggle-switch label { margin-right: 10px; } }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <main class="main-content">
+            <header class="header">
+                 <div class="header-left">
+                     <a href="{{ back_url or url_for('dashboard') }}" class="btn btn-back" aria-label="Go Back">
+                         <i class="fas fa-arrow-left"></i>
+                     </a>
+                     <div class="header-title">Settings</div>
+                 </div>
+                 <div class="header-actions">
+                     <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+                         </button>
+                 </div>
+            </header>
+
+            <div class="content">
+                <div class="settings-grid">
+
+                    <div class="settings-card">
+                        <h3>Profile Information</h3>
+                        <form id="profile-form" action="{{ url_for('update_profile') }}" method="post">
+                            {% if user and user.full_name %}
+                                {% set names = user.full_name.split(' ', 1) %}
+                                {% set first_name = names[0] %}
+                                {% set last_name = names[1] if names|length > 1 else '' %}
+                            {% else %}
+                                {% set first_name = '' %}
+                                {% set last_name = '' %}
+                            {% endif %}
+                            
+                            <div class="form-group">
+                                <label for="first-name">First Name</label>
+                                <input type="text" id="first-name" name="firstName" value="{{ first_name }}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="last-name">Last Name</label>
+                                <input type="text" id="last-name" name="lastName" value="{{ last_name }}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="email">Email</label>
+                                <input type="email" id="email" name="email" value="{{ user.email if user else '' }}" readonly>
+                                <p class="input-hint">Email cannot be changed.</p>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">Save Changes</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="settings-card">
+                        <h3>Learning Preferences</h3>
+                        <form id="learning-form">
+                            <div class="form-group">
+                                <label for="learning-style">Preferred Learning Style</label>
+                                <select id="learning-style" name="learningStyle">
+                                    <option value="visual" {{ 'selected' if user and user.learning_style == 'visual' else '' }}>Visual</option>
+                                    <option value="auditory" {{ 'selected' if user and user.learning_style == 'auditory' else '' }}>Auditory</option>
+                                    <option value="kinesthetic" {{ 'selected' if user and user.learning_style == 'kinesthetic' else '' }}>Kinesthetic</option>
+                                    <option value="reading_writing" {{ 'selected' if user and user.learning_style == 'reading_writing' else '' }}>Reading/Writing</option>
+                                </select>
+                                <p class="input-hint">Helps personalize your learning experience.</p>
+                            </div>
+                            <div class="form-group">
+                                <label for="study-goals">Primary Study Goal</label>
+                                <select id="study-goals" name="studyGoals">
+                                    <option value="exam_prep" {{ 'selected' if user and user.study_goal == 'exam_prep' else '' }}>Exam Preparation</option>
+                                    <option value="skill_mastery" {{ 'selected' if user and user.study_goal == 'skill_mastery' else '' }}>Skill Mastery</option>
+                                    <option value="project_based" {{ 'selected' if user and user.study_goal == 'project_based' else '' }}>Project-Based Learning</option>
+                                    <option value="general_knowledge" {{ 'selected' if user and user.study_goal == 'general_knowledge' else '' }}>General Knowledge</option>
+                                </select>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">Save Preferences</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Theme Toggle Functionality
+        const body = document.body;
+        const themeToggleButton = document.getElementById('theme-toggle');
+
+        function setTheme(theme) {
+            if(!themeToggleButton) return; // Exit if button not found
+
+            localStorage.setItem('theme', theme); // Store preference
+             if (theme === 'dark') {
+                 body.classList.add('dark-mode');
+                 body.classList.remove('light-mode'); // Ensure light mode is removed
+                 themeToggleButton.innerHTML = '☀️'; // Sun emoji for dark mode
+                 themeToggleButton.setAttribute('title', 'Switch to light mode');
+                 themeToggleButton.setAttribute('aria-label', 'Switch to light mode');
+             } else {
+                 body.classList.add('light-mode'); // Ensure light mode is added
+                 body.classList.remove('dark-mode');
+                 themeToggleButton.innerHTML = '🌙'; // Moon emoji for light mode
+                 themeToggleButton.setAttribute('title', 'Switch to dark mode');
+                 themeToggleButton.setAttribute('aria-label', 'Switch to dark mode');
+             }
+         }
+
+         // Check for saved theme preference or use device preference
+         const savedTheme = localStorage.getItem('theme');
+         const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+         let initialTheme = 'light'; // Default to light
+         if (savedTheme) {
+             initialTheme = savedTheme;
+         } else if (prefersDark) {
+             initialTheme = 'dark';
+         }
+         // Apply initial theme class *before* DOMContentLoaded listener might run
+         // Also set initial emoji correctly
+          if (initialTheme === 'dark') {
+              body.classList.add('dark-mode');
+              body.classList.remove('light-mode');
+             if(themeToggleButton) themeToggleButton.innerHTML = '☀️';
+             if(themeToggleButton) themeToggleButton.setAttribute('title', 'Switch to light mode');
+             if(themeToggleButton) themeToggleButton.setAttribute('aria-label', 'Switch to light mode');
+         } else {
+             body.classList.add('light-mode');
+             body.classList.remove('dark-mode');
+             if(themeToggleButton) themeToggleButton.innerHTML = '🌙';
+             if(themeToggleButton) themeToggleButton.setAttribute('title', 'Switch to dark mode');
+             if(themeToggleButton) themeToggleButton.setAttribute('aria-label', 'Switch to dark mode');
+         }
+
+         // Add click listener for the toggle button
+         if (themeToggleButton) {
+              themeToggleButton.addEventListener('click', () => {
+                  // Toggle based on presence of dark-mode class
+                  const newTheme = body.classList.contains('dark-mode') ? 'light' : 'dark';
+                  setTheme(newTheme);
+              });
+          }
+
+        // Basic form submission simulation
+        document.querySelectorAll('form').forEach(form => {
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                console.log(`Form ${form.id} submitted.`);
+                const submitButton = form.querySelector('button[type="submit"]');
+                if (submitButton) {
+                    const originalText = submitButton.textContent;
+                    submitButton.textContent = 'Saving...';
+                    submitButton.disabled = true;
+                    setTimeout(() => {
+                         submitButton.textContent = originalText;
+                         submitButton.disabled = false;
+                    }, 1000);
+                }
+            });
+        });
+
+    </script>
+</body>
+</html>
